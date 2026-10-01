@@ -1,0 +1,62 @@
+.learning-tutor:has(.tutor-panel) { padding: 0; overflow: hidden; }
+.tutor-panel { display: flex; flex-direction: column; height: 100%; min-height: 0; color: var(--color-text); background: #fff; }
+.tutor-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 18px 8px; }
+.tutor-heading { display: flex; align-items: center; gap: 8px; color: var(--color-primary); }
+.tutor-header-actions { display: flex; align-items: center; gap: 4px; }
+.tutor-header-actions .icon-button { width: 28px; height: 28px; }
+.tutor-header-actions [aria-pressed="true"] { background: var(--color-primary-soft); color: var(--color-primary); }
+.tutor-panel .tutor-heading h2 { margin: 0; font-size: .95rem; color: var(--color-text); }
+.tutor-panel .tutor-lesson { margin: 0; padding: 0 18px 16px; max-width: none; font-size: .75rem; line-height: 1.4; color: var(--color-subtle); overflow-wrap: anywhere; border-bottom: 1px solid var(--color-border); }
+.tutor-messages { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 18px; scrollbar-width: thin; }
+.tutor-empty { padding: 28px 0; }
+.tutor-empty-icon { color: var(--color-primary); }
+.tutor-empty h3 { margin: 12px 0 16px; font-size: 1rem; }
+.tutor-suggestions { display: flex; flex-direction: column; gap: 8px; }
+.tutor-suggestions button { text-align: left; padding: 11px 12px; border: 1px solid var(--color-border); border-radius: 6px; background: #f8fafc; color: var(--color-text); font: inherit; font-size: .8rem; cursor: pointer; }
+.tutor-suggestions button:hover { background: var(--color-primary-soft); border-color: var(--color-primary); }
+.tutor-message { margin-bottom: 18px; min-width: 0; }
+.tutor-message.user { padding: 12px; background: #eef5fc; border-radius: 6px; }
+.tutor-message-author { display: block; margin-bottom: 6px; font-size: .68rem; font-weight: 700; color: var(--color-subtle); }
+.tutor-message-content { font-size: .84rem; line-height: 1.65; overflow-wrap: anywhere; }
+.tutor-panel .tutor-message-content p { margin: 0 0 10px; max-width: none; font-size: inherit; line-height: inherit; }
+.tutor-message-content > :last-child { margin-bottom: 0; }
+.tutor-message-content h1, .tutor-message-content h2, .tutor-message-content h3 { font-size: .9rem; margin: 12px 0 6px; }
+.tutor-message-content ul, .tutor-message-content ol { padding-left: 20px; }
+.tutor-message-content pre { overflow-x: auto; padding: 10px; border-radius: 4px; background: #f1f4f7; }
+.tutor-message-content code { font-size: .75rem; white-space: pre-wrap; }
+.tutor-message-content pre code { white-space: pre; }
+.tutor-message-tools { display: flex; align-items: flex-start; gap: 8px; margin-top: 8px; }
+.tutor-message-tools .icon-button { width: 28px; height: 28px; flex: none; }
+.tutor-sources { min-width: 0; font-size: .72rem; color: var(--color-subtle); }
+.tutor-sources summary { padding: 6px 0; cursor: pointer; }
+.tutor-sources > div { padding: 8px 0; border-top: 1px solid var(--color-border); }
+.tutor-panel .tutor-sources p { max-width: none; margin-top: 5px; font-size: .72rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.tutor-thinking { display: flex; align-items: center; gap: 8px; min-height: 28px; font-size: .75rem; color: var(--color-subtle); }
+.tutor-pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--color-primary); animation: tutor-pulse 1s ease-in-out infinite alternate; }
+@keyframes tutor-pulse { to { opacity: .3; } }
+.tutor-interrupted { display: block; margin-top: 6px; color: var(--color-subtle); font-size: .7rem; }
+.tutor-error { margin: 0 18px 10px; padding: 10px; background: #fff0ef; color: #a52822; font-size: .76rem; line-height: 1.5; border-radius: 4px; }
+.tutor-error button { display: block; margin-top: 6px; padding: 0; border: 0; background: transparent; color: inherit; text-decoration: underline; cursor: pointer; }
+.tutor-composer { display: flex; align-items: flex-end; gap: 8px; padding: 14px; border-top: 1px solid var(--color-border); background: #fff; }
+.tutor-composer textarea { flex: 1; min-width: 0; min-height: 68px; max-height: 150px; resize: vertical; padding: 10px; border: 1px solid var(--color-border); border-radius: 6px; font: inherit; font-size: .8rem; line-height: 1.5; background: #f8fafc; }
+.tutor-composer textarea:focus { outline: 2px solid var(--color-primary-soft); border-color: var(--color-primary); }
+.tutor-send { display: grid; place-items: center; flex: none; width: 36px; height: 36px; margin-bottom: 1px; border: 0; border-radius: 6px; background: var(--color-primary); color: white; cursor: pointer; }
+.tutor-send:disabled { opacity: .4; cursor: default; }
+.tutor-composer-actions { display: flex; flex-direction: column; gap: 5px; }
+.tutor-mic { display: grid; place-items: center; width: 36px; height: 30px; border: 1px solid var(--color-border); border-radius: 6px; background: #fff; color: var(--color-subtle); cursor: pointer; }
+.tutor-mic.recording { color: #b53131; background: #fff0ef; border-color: #eb9a95; }
+.tutor-mic:disabled { opacity: .4; cursor: default; }
+.tutor-voice-status { padding: 8px 18px; color: var(--color-subtle); font-size: .75rem; }
+.tutor-spinner { animation: tutor-spin 1s linear infinite; }
+@keyframes tutor-spin { to { transform: rotate(360deg); } }
+.tutor-toggle { display: none; }
+.tutor-mobile-close { display: none; }
+.tutor-overlay { position: fixed; inset: 0; z-index: 90; background: #172b4050; }
+.tutor-overlay .learning-tutor { display: block; position: absolute; inset: 0 0 0 auto; width: min(400px, 100%); height: 100%; padding: 0; border: 0; }
+.tutor-overlay .tutor-panel { height: calc(100% - 48px); }
+.tutor-overlay .tutor-mobile-close { display: flex; justify-content: flex-end; align-items: center; min-height: 48px; padding: 6px 14px; border-bottom: 1px solid var(--color-border); }
+@media (max-width: 1250px) {
+  .tutor-toggle { display: flex; }
+}
+@media (max-width: 600px) { .tutor-toggle span { display: none; } .tutor-composer { padding-bottom: max(14px, env(safe-area-inset-bottom)); } }
+@media (prefers-reduced-motion: reduce) { .tutor-pulse, .tutor-spinner { animation: none; } }

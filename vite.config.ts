@@ -2,12 +2,14 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import https from 'node:https'
+import http from 'node:http'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const proxyTarget = env.API_PROXY_TARGET || process.env.API_PROXY_TARGET || 'https://test.aiedu.com.kz'
 
-  const agent = new https.Agent({
+  const Agent = proxyTarget.startsWith('https:') ? https.Agent : http.Agent
+  const agent = new Agent({
     keepAlive: true,
     maxSockets: 50,
     keepAliveMsecs: 10000,

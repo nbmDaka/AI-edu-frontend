@@ -1,10 +1,13 @@
 import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
-import { createServer } from 'node:http'
+import { createServer, request as httpRequest } from 'node:http'
+import { request as httpsRequest } from 'node:https'
 import { extname, resolve, sep } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { createGzip } from 'node:zlib'
 
-const root = resolve('/app/dist')
+const root = fileURLToPath(new URL('./dist/', import.meta.url)).replace(/[\\/]$/, '')
+const apiTarget = process.env.API_PROXY_TARGET ? new URL(process.env.API_PROXY_TARGET) : null
 const mimeTypes = {
   '.css': 'text/css; charset=utf-8',
   '.html': 'text/html; charset=utf-8',
@@ -22,6 +25,24 @@ const mimeTypes = {
 }
 
 createServer(async (request, response) => {
+  if (apiTarget && request.url?.startsWith('/api/')) {
+    const target = new URL(request.url, apiTarget)
+    const send = target.protocol === 'https:' ? httpsRequest : httpRequest
+    const upstream = send(target, { method: request.method, headers: { ...request.headers, host: target.host } }, incoming => {
+      response.writeHead(incoming.statusCode ?? 502, incoming.headers)
+      incoming.pipe(response)
+      response.on('close', () => incoming.destroy())
+    })
+    upstream.setTimeout(120000, () => upstream.destroy(new Error('Backend timeout')))
+    upstream.on('error', () => {
+      if (response.headersSent) response.destroy()
+      else response.writeHead(502, { 'Content-Type': 'application/json' }).end(JSON.stringify({ detail: 'Сервис платформы недоступен.' }))
+    })
+    request.on('aborted', () => upstream.destroy())
+    response.on('close', () => upstream.destroy())
+    request.pipe(upstream)
+    return
+  }
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     response.writeHead(405, { Allow: 'GET, HEAD' }).end()
     return
@@ -80,4 +101,4 @@ createServer(async (request, response) => {
   } catch {
     response.writeHead(404).end('Not found')
   }
-}).listen(3000, '0.0.0.0')
+}).listen(Number(process.env.PORT ?? 3000), process.env.HOST ?? '0.0.0.0')
