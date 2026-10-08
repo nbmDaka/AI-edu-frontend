@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { ArrowLeft, BookOpen, Check, CheckCircle2, Code2, List, Sparkles, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { LearningItem, Lesson, Module } from '../api'
@@ -21,8 +21,26 @@ export function LearningLayout({ children, tutor, courseTitle, moduleTitle, sect
   courseProgress?: number; itemProgress?: Record<string, ItemProgress>
 }) {
   const [outlineOpen, setOutlineOpen] = useState(false)
+  const [tutorOpen, setTutorOpen] = useState(false)
+  const tutorDialog = useRef<HTMLDivElement>(null)
   const { t } = useI18n()
-  useEffect(() => { setOutlineOpen(false) }, [lessonId])
+  useEffect(() => { setOutlineOpen(false); setTutorOpen(false) }, [lessonId])
+  useEffect(() => {
+    if (!tutorOpen) return
+    const returnFocus = document.activeElement as HTMLElement | null
+    const close = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setTutorOpen(false)
+      if (event.key !== 'Tab') return
+      const elements = [...(tutorDialog.current?.querySelectorAll<HTMLElement>('button:not(:disabled), textarea:not(:disabled), a[href], input:not(:disabled), summary') ?? [])].filter(element => element.getClientRects().length)
+      const first = elements[0], last = elements.at(-1)
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus() }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus() }
+    }
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', close)
+    return () => { document.body.style.overflow = previousOverflow; window.removeEventListener('keydown', close); if (returnFocus?.isConnected) returnFocus.focus() }
+  }, [tutorOpen])
   useEffect(() => {
     if (!outlineOpen) return
     const close = (event: KeyboardEvent) => { if (event.key === 'Escape') setOutlineOpen(false) }
@@ -48,7 +66,7 @@ export function LearningLayout({ children, tutor, courseTitle, moduleTitle, sect
     <header className="learning-header">
       <Link to="/catalog" className="learning-back" aria-label={t('Вернуться в каталог')}><ArrowLeft size={17}/><span>{t('Каталог')}</span></Link>
       <div className="learning-header-title"><span>{courseTitle || t('Моё обучение')}</span><strong>{moduleTitle || lessonTitle}</strong></div>
-      <div className="learning-header-tools"><LanguageSelect compact/><button className="button secondary outline-button" onClick={() => setOutlineOpen(true)} aria-expanded={outlineOpen} aria-controls="course-outline"><List size={17}/><span>{t('Содержание')}</span></button></div>
+      <div className="learning-header-tools"><LanguageSelect compact/>{tutor && <button className="button secondary tutor-toggle" title={t('Открыть тьютора')} aria-label={t('Открыть тьютора')} aria-expanded={tutorOpen} onClick={() => setTutorOpen(true)}><Sparkles size={17}/><span>{t('Тьютор')}</span></button>}<button className="button secondary outline-button" onClick={() => setOutlineOpen(true)} aria-expanded={outlineOpen} aria-controls="course-outline"><List size={17}/><span>{t('Содержание')}</span></button></div>
     </header>
     <div className="learning-workspace">
       <aside className="course-outline desktop-outline" aria-label={t('Содержание курса')}>{outline}</aside>
@@ -59,8 +77,9 @@ export function LearningLayout({ children, tutor, courseTitle, moduleTitle, sect
           {next ? <Link className="button secondary" to={entryHref(next)} aria-label={`${t('Следующий элемент')}: ${next.title}`}><span><small>{t('Следующий')}</small>{next.title}</span><ArrowLeft className="next-arrow" size={16}/></Link> : <span className="course-end"><Check size={16}/>{t('Последний элемент')}</span>}
         </footer>
       </div>
-      <aside className="learning-tutor" aria-label={t('AI Tutor')}>{tutor ?? <AITutorPlaceholder/>}</aside>
+      {!tutorOpen && <aside className="learning-tutor" aria-label={t('AI Tutor')}>{tutor ?? <AITutorPlaceholder/>}</aside>}
     </div>
     {outlineOpen && <div className="outline-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) setOutlineOpen(false) }}><aside id="course-outline" className="course-outline mobile-outline" aria-label={t('Содержание курса')}>{outline}</aside></div>}
+    {tutorOpen && <div ref={tutorDialog} className="tutor-overlay" role="dialog" aria-modal="true" aria-label={t('ИИ-тьютор')} onMouseDown={event => { if (event.target === event.currentTarget) setTutorOpen(false) }}><aside className="learning-tutor"><div className="tutor-mobile-close"><button autoFocus className="icon-button" title={t('Закрыть тьютора')} aria-label={t('Закрыть тьютора')} onClick={() => setTutorOpen(false)}><X size={19}/></button></div>{tutor}</aside></div>}
   </div>
 }
