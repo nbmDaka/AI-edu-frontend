@@ -6,7 +6,7 @@ import { entityPath, type Entity, type EntityKind, type EntitySelection } from '
 import { AddLearningItemMenu, LearningItemTypeIcon, itemTypeLabel } from './LearningItemControls'
 import { useI18n } from '../i18n'
 
-export type ModuleGroup = { module: Module; items: LearningItem[]; totalItems: number }
+export type ModuleGroup = { module: Module; items: LearningItem[]; totalItems: number; hasTest: boolean }
 export type CourseGroup = { course: Course; modules: ModuleGroup[]; totalModules: number }
 
 function Status({ published }: { published: boolean }) {
@@ -69,7 +69,7 @@ function LearningItemRow({ item, index, length, trackKey, canReorder, onMove, on
     <Link className="curriculum-row-title" to={href}>{item.title}</Link>
     <span className="curriculum-item-type">{t(itemTypeLabel[item.type])}</span>
     <Status published={item.status === 'PUBLISHED'}/>
-    <EntityActionsMenu kind="items" item={item} editHref={href} canMoveUp={canReorder && index > 0} canMoveDown={canReorder && index < length - 1} onMove={onMove} onDelete={onDelete}/>
+    <EntityActionsMenu kind="items" item={item} editHref={href} canMoveUp={canReorder && item.type !== 'TEST' && index > 0} canMoveDown={canReorder && item.type !== 'TEST' && index < length - 1} onMove={onMove} onDelete={onDelete}/>
   </div>
 }
 
@@ -79,7 +79,8 @@ function ModuleRow({ group, index, length, trackKey, expanded, forceOpen, onTogg
   onCreate: TreeProps['onCreate']; onMove: TreeProps['onMove']; onDelete: TreeProps['onDelete']
 }) {
   const { t } = useI18n()
-  const { module, items, totalItems } = group
+  const { module, items, totalItems, hasTest } = group
+  const contentCount = items.filter(item => item.type !== 'TEST').length
   const key = `module-${module.id}`
   const open = forceOpen || (expanded[key] ?? true)
   const href = `${entityPath('modules', module)}?track=${encodeURIComponent(trackKey)}`
@@ -90,10 +91,10 @@ function ModuleRow({ group, index, length, trackKey, expanded, forceOpen, onTogg
       <Link className="curriculum-row-title" to={href}>{module.title}</Link>
       <span className="curriculum-count">{totalItems} {t('эл.')}</span>
       <Status published={module.is_published}/>
-      <AddLearningItemMenu onSelect={type => onCreate('items', module.id, type)}/>
+      <AddLearningItemMenu hasTest={hasTest} onSelect={type => onCreate('items', module.id, type)}/>
       <EntityActionsMenu kind="modules" item={module} editHref={href} canMoveUp={!forceOpen && index > 0} canMoveDown={!forceOpen && index < length - 1} onMove={onMove} onDelete={onDelete}/>
     </div>
-    {open && <div className="curriculum-lessons">{items.length ? items.map((item, itemIndex) => <LearningItemRow key={item.id} item={item} index={itemIndex} length={items.length} trackKey={trackKey} canReorder={!forceOpen} onMove={onMove} onDelete={onDelete}/>) : <div className="curriculum-empty-row">{t('Элементов пока нет. Добавьте лекцию, практику или тест.')}</div>}</div>}
+    {open && <div className="curriculum-lessons">{items.length ? items.map((item, itemIndex) => <LearningItemRow key={item.id} item={item} index={itemIndex} length={contentCount} trackKey={trackKey} canReorder={!forceOpen} onMove={onMove} onDelete={onDelete}/>) : <div className="curriculum-empty-row">{t('Элементов пока нет. Добавьте лекцию, практику или тест.')}</div>}</div>}
   </div>
 }
 

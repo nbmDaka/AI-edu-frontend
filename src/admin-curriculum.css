@@ -43,7 +43,8 @@
 .add-learning-item{position:relative;display:inline-flex;flex:none}
 .add-learning-item-menu{position:absolute;z-index:30;right:0;top:calc(100% + 4px);display:grid;width:215px;padding:5px;border:1px solid #dfe7ef;border-radius:9px;background:#fff;box-shadow:0 12px 30px #152a432b}
 .add-learning-item-menu button{display:flex;align-items:center;gap:9px;padding:9px;border:0;border-radius:6px;background:transparent;color:#344b65;text-align:left;font-size:12px;cursor:pointer}
-.add-learning-item-menu button:hover{background:#f1f6fa}
+.add-learning-item-menu button:not(:disabled):hover{background:#f1f6fa}
+.add-learning-item-menu button:disabled{opacity:.45;cursor:not-allowed}
 .curriculum-empty-row{padding:13px 12px;color:#9aa6b5;font-size:12px}
 .curriculum-empty-row button{margin-left:8px;border:0;background:none;color:#2681be;font-size:12px;font-weight:700;cursor:pointer}
 .entity-actions{position:relative;flex:none}

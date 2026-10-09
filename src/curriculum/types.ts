@@ -11,3 +11,4 @@ export const entityPath = (kind: EntityKind, item: Entity) => {
   return `/admin/curriculum/items/${item.short_id}/edit`
 }
 export const sortByPosition = <T extends { position: number; id: number }>(items: T[]) => [...items].sort((a, b) => a.position - b.position || a.id - b.id)
+export const sortLearningItems = (items: LearningItem[]) => [...items].sort((a, b) => Number(a.type === 'TEST') - Number(b.type === 'TEST') || a.position - b.position || a.id - b.id)

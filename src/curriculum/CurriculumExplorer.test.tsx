@@ -100,17 +100,14 @@ describe('curriculum explorer', () => {
     await waitFor(() => expect(mockedApi).toHaveBeenCalledWith('items/item-4/', 'DELETE'))
   })
 
-  it('creates a test item from the type menu and moves it before a lecture', async () => {
+  it('creates one test and keeps it after the other items', async () => {
     mockedApi.mockImplementation(async (path, method, body) => {
       if (path === 'items/' && method === 'POST') {
         const created = { ...item, id: 5, short_id: 'item-5', type: 'TEST' as const, title: (body as { title: string }).title, position: 1, lesson: null, lesson_short_id: null, test: 11 }
         items = [...items, created]
         return created as never
       }
-      if (path === 'items/item-5/' && method === 'PATCH') {
-        items = [{ ...item, position: 1 }, { ...items[1]!, position: 0 }]
-        return items[1] as never
-      }
+      if (path === 'items/item-5/' && method === 'DELETE') { items = [item]; return undefined as never }
       return {} as never
     })
     renderExplorer()
@@ -121,9 +118,38 @@ describe('curriculum explorer', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Создать' }))
     await waitFor(() => expect(mockedApi).toHaveBeenCalledWith('items/', 'POST', expect.objectContaining({ type: 'TEST', module: 3 })))
     await screen.findByRole('link', { name: 'Проверка знаний' })
+    const rows = screen.getAllByRole('link').filter(link => link.classList.contains('curriculum-row-title'))
+    expect(rows.slice(-2).map(link => link.textContent)).toEqual(['Первая лекция', 'Проверка знаний'])
+    fireEvent.click(screen.getByRole('button', { name: 'Добавить элемент' }))
+    expect((screen.getByRole('menuitem', { name: 'Тест' }) as HTMLButtonElement).disabled).toBe(true)
+    expect((screen.getByRole('menuitem', { name: 'Лекция' }) as HTMLButtonElement).disabled).toBe(false)
+    expect((screen.getByRole('menuitem', { name: 'Практическая работа' }) as HTMLButtonElement).disabled).toBe(false)
+    fireEvent.keyDown(document, { key: 'Escape' })
     fireEvent.click(screen.getByRole('button', { name: 'Действия: Проверка знаний' }))
+    expect((screen.getByRole('menuitem', { name: 'Переместить выше' }) as HTMLButtonElement).disabled).toBe(true)
+    expect((screen.getByRole('menuitem', { name: 'Переместить ниже' }) as HTMLButtonElement).disabled).toBe(true)
     fireEvent.click(screen.getByRole('menuitem', { name: 'Переместить выше' }))
-    await waitFor(() => expect(mockedApi).toHaveBeenCalledWith('items/item-5/', 'PATCH', { position: 0 }))
+    expect(mockedApi).not.toHaveBeenCalledWith('items/item-5/', 'PATCH', expect.anything())
+    fireEvent.keyDown(document, { key: 'Escape' })
+    fireEvent.click(screen.getByRole('button', { name: 'Действия: Первая лекция' }))
+    expect((screen.getByRole('menuitem', { name: 'Переместить ниже' }) as HTMLButtonElement).disabled).toBe(true)
+    fireEvent.keyDown(document, { key: 'Escape' })
+    fireEvent.click(screen.getByRole('button', { name: 'Действия: Проверка знаний' }))
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Удалить' }))
+    fireEvent.click(screen.getByRole('dialog').querySelector('.button.danger') as HTMLElement)
+    await waitFor(() => expect(screen.queryByRole('link', { name: 'Проверка знаний' })).toBeNull())
+    fireEvent.click(screen.getByRole('button', { name: 'Добавить элемент' }))
+    expect((screen.getByRole('menuitem', { name: 'Тест' }) as HTMLButtonElement).disabled).toBe(false)
+  })
+
+  it('disables test creation even when search hides the existing test', async () => {
+    items = [...items, { ...item, id: 5, short_id: 'item-5', type: 'TEST', title: 'Проверка знаний', position: 1 }]
+    renderExplorer()
+    await screen.findByRole('link', { name: 'Проверка знаний' })
+    fireEvent.change(screen.getByRole('textbox', { name: 'Поиск по учебной структуре' }), { target: { value: 'Первая лекция' } })
+    expect(screen.queryByRole('link', { name: 'Проверка знаний' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Добавить элемент' }))
+    expect((screen.getByRole('menuitem', { name: 'Тест' }) as HTMLButtonElement).disabled).toBe(true)
   })
 
   it.each([

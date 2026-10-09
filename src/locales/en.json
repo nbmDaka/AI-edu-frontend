@@ -33,6 +33,7 @@
   "МОДУЛЬ": "MODULE",
   "Лекция": "Lecture",
   "Тест": "Test",
+  "В модуле может быть только один тест": "A module can only have one test",
   "Практика": "Practice",
   "ПРОВЕРЬТЕ СЕБЯ": "CHECK YOURSELF",
   "Проходной балл": "Passing score",

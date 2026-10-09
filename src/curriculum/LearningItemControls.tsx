@@ -13,7 +13,7 @@ export const itemTypeLabel: Record<LearningItem['type'], string> = {
   LECTURE: 'Лекция', TEST: 'Тест', PRACTICE: 'Практика',
 }
 
-export function AddLearningItemMenu({ onSelect }: { onSelect: (type: LearningItem['type']) => void }) {
+export function AddLearningItemMenu({ onSelect, hasTest }: { onSelect: (type: LearningItem['type']) => void; hasTest: boolean }) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -27,6 +27,6 @@ export function AddLearningItemMenu({ onSelect }: { onSelect: (type: LearningIte
   }, [open])
   return <div className="add-learning-item" ref={ref}>
     <button className="curriculum-add-inline" type="button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(value => !value)}><Plus size={17}/> {t('Добавить элемент')}</button>
-    {open && <div className="add-learning-item-menu" role="menu">{(['LECTURE', 'TEST', 'PRACTICE'] as const).map(type => <button type="button" role="menuitem" key={type} onClick={() => { setOpen(false); onSelect(type) }}><LearningItemTypeIcon type={type}/>{type === 'PRACTICE' ? t('Практическая работа') : t(itemTypeLabel[type])}</button>)}</div>}
+    {open && <div className="add-learning-item-menu" role="menu">{(['LECTURE', 'PRACTICE', 'TEST'] as const).map(type => <button type="button" role="menuitem" key={type} disabled={type === 'TEST' && hasTest} title={type === 'TEST' && hasTest ? t('В модуле может быть только один тест') : undefined} onClick={() => { setOpen(false); onSelect(type) }}><LearningItemTypeIcon type={type}/>{type === 'PRACTICE' ? t('Практическая работа') : t(itemTypeLabel[type])}</button>)}</div>}
   </div>
 }
