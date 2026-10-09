@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { ArrowLeft, BookOpen, Check, CheckCircle2, Code2, List, Sparkles, X } from 'lucide-react'
+import { ArrowLeft, BookOpen, Check, CheckCircle2, Code2, List, LockKeyhole, Sparkles, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { LearningItem, Lesson, Module } from '../api'
 import { LanguageSelect, useI18n } from '../i18n'
@@ -9,6 +9,7 @@ export type ItemProgress = { progress_percent: number; is_completed: boolean }
 export type CourseSection = { module: Module; lessons: ContentEntry[] }
 const entryHref = (item: ContentEntry) => 'type' in item ? `/items/${item.short_id}` : `/lessons/${item.short_id}`
 const entryIcon = (item: ContentEntry) => 'type' in item && item.type === 'TEST' ? <CheckCircle2 size={15}/> : 'type' in item && item.type === 'PRACTICE' ? <Code2 size={15}/> : <BookOpen size={15}/>
+const entryLocked = (item: ContentEntry) => Boolean(item.is_locked)
 
 function AITutorPlaceholder() {
   const { t } = useI18n()
@@ -37,6 +38,7 @@ export function LearningLayout({ children, tutor, courseTitle, moduleTitle, sect
       <h3>{t('МОДУЛЬ')} {sectionIndex + 1} · {section.module.title}</h3>
       {section.lessons.map(item => {
         const state = itemProgress[item.short_id]
+        if (section.module.is_locked || entryLocked(item)) return <div key={item.id} className="outline-lesson is-locked" aria-disabled="true" title={t('Сначала завершите предыдущий модуль')}><LockKeyhole size={15}/><span className="outline-lesson-title">{item.title}</span></div>
         return <Link key={item.id} to={entryHref(item)} onClick={() => setOutlineOpen(false)} className={`outline-lesson ${item.short_id === lessonId ? 'active' : ''}`} aria-current={item.short_id === lessonId ? 'page' : undefined}>
           {entryIcon(item)}<span className="outline-lesson-title">{item.title}</span>{state?.is_completed ? <Check size={15} className="outline-complete" aria-label={t('Выполнено')}/> : state?.progress_percent ? <small>{state.progress_percent}%</small> : null}
         </Link>
@@ -56,7 +58,7 @@ export function LearningLayout({ children, tutor, courseTitle, moduleTitle, sect
         <footer className="lesson-navigation">
           {previous ? <Link className="button secondary" to={entryHref(previous)} aria-label={`${t('Предыдущий элемент')}: ${previous.title}`}><ArrowLeft size={16}/><span><small>{t('Предыдущий')}</small>{previous.title}</span></Link> : <span/>}
           <span className="lesson-counter">{totalLessons ? `${(currentIndex || 0) + 1} ${t('из')} ${totalLessons}` : t('Элемент')}</span>
-          {next ? <Link className="button secondary" to={entryHref(next)} aria-label={`${t('Следующий элемент')}: ${next.title}`}><span><small>{t('Следующий')}</small>{next.title}</span><ArrowLeft className="next-arrow" size={16}/></Link> : <span className="course-end"><Check size={16}/>{t('Последний элемент')}</span>}
+          {next ? entryLocked(next) ? <span className="course-end"><LockKeyhole size={16}/>{t('Сначала завершите текущий модуль')}</span> : <Link className="button secondary" to={entryHref(next)} aria-label={`${t('Следующий элемент')}: ${next.title}`}><span><small>{t('Следующий')}</small>{next.title}</span><ArrowLeft className="next-arrow" size={16}/></Link> : <span className="course-end"><Check size={16}/>{t('Последний элемент')}</span>}
         </footer>
       </div>
       <aside className="learning-tutor" aria-label={t('AI Tutor')}>{tutor ?? <AITutorPlaceholder/>}</aside>

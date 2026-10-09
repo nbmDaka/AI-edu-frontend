@@ -26,15 +26,16 @@ function PracticeEditorPage({ item, moduleTitle }: { item: LearningItem; moduleT
   const qc = useQueryClient()
   const [title, setTitle] = useState(item.title)
   const [description, setDescription] = useState(item.description)
+  const [criteria, setCriteria] = useState((item.practice_criteria ?? []).join('\n'))
   const [dirty, setDirty] = useState(false)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
-  useEffect(() => { if (!dirty) { setTitle(item.title); setDescription(item.description) } }, [item, dirty])
+  useEffect(() => { if (!dirty) { setTitle(item.title); setDescription(item.description); setCriteria((item.practice_criteria ?? []).join('\n')) } }, [item, dirty])
   useLeaveWarning(dirty)
   const save = async () => {
     setBusy(true); setMessage('')
     try {
-      await api(`items/${item.short_id}/`, 'PATCH', { title: title.trim(), description })
+      await api(`items/${item.short_id}/`, 'PATCH', { title: title.trim(), description, practice_criteria: criteria.split('\n').map(value => value.trim()).filter(Boolean) })
       setDirty(false); setMessage(t('Черновик сохранён'))
       await qc.invalidateQueries({ queryKey: ['admin', 'items'] })
       await qc.invalidateQueries({ queryKey: ['admin-item', item.short_id] })
@@ -44,12 +45,12 @@ function PracticeEditorPage({ item, moduleTitle }: { item: LearningItem; moduleT
   const publish = async () => {
     setBusy(true); setMessage('')
     try {
-      await api(`items/${item.short_id}/`, 'PATCH', { title: title.trim(), description, status: 'PUBLISHED' })
+      await api(`items/${item.short_id}/`, 'PATCH', { title: title.trim(), description, practice_criteria: criteria.split('\n').map(value => value.trim()).filter(Boolean), status: 'PUBLISHED' })
       setDirty(false); setMessage(t('Практика опубликована'))
       await qc.invalidateQueries({ queryKey: ['admin', 'items'] })
       await qc.invalidateQueries({ queryKey: ['admin-item', item.short_id] })
     } catch (error) { setMessage(error instanceof Error ? error.message : t('Не удалось опубликовать')) }
     finally { setBusy(false) }
   }
-  return <div className="practice-editor-page"><Link className="back" to="/admin/curriculum"><ArrowLeft size={16}/>{moduleTitle || t('Структура курса')}</Link><span className="eyebrow">{t('ПРАКТИЧЕСКАЯ РАБОТА')}</span><h1>{title || t('Новая практика')}</h1><p>{t('Настройка интерактивных практических заданий появится здесь. Пока можно подготовить название и описание.')}</p><div className="card form-card"><label>{t('Название')}<Input value={title} maxLength={200} onChange={event => { setTitle(event.target.value); setDirty(true) }}/></label><label>{t('Описание')}<Textarea rows={5} value={description} onChange={event => { setDescription(event.target.value); setDirty(true) }}/></label><p className="coming-soon">{t(item.status === 'PUBLISHED' ? 'Опубликована' : 'Черновик')} · {t('выполнение практики пока недоступно')}</p><div className="row"><Button variant="secondary" disabled={busy || !dirty || !title.trim()} onClick={() => void save()}>{t('Сохранить')}</Button><Button disabled={busy || !title.trim()} onClick={() => void publish()}>{t(item.status === 'PUBLISHED' ? 'Обновить публикацию' : 'Опубликовать')}</Button></div><Notice text={message} kind={message === t('Черновик сохранён') || message === t('Практика опубликована') ? 'success' : 'error'}/></div></div>
+  return <div className="practice-editor-page"><Link className="back" to="/admin/curriculum"><ArrowLeft size={16}/>{moduleTitle || t('Структура курса')}</Link><span className="eyebrow">{t('ПРАКТИЧЕСКАЯ РАБОТА')}</span><h1>{title || t('Новая практика')}</h1><p>{t('Опишите задание и критерии, по которым студент проверит выполненную работу.')}</p><div className="card form-card"><label>{t('Название')}<Input value={title} maxLength={200} onChange={event => { setTitle(event.target.value); setDirty(true) }}/></label><label>{t('Описание')}<Textarea rows={5} value={description} onChange={event => { setDescription(event.target.value); setDirty(true) }}/></label><label>{t('Критерии самопроверки — каждый с новой строки')}<Textarea rows={6} value={criteria} onChange={event => { setCriteria(event.target.value); setDirty(true) }}/></label><p>{t('До 30 критериев, не более 300 символов каждый. Результат самопроверки учитывается в готовности модуля.')}</p><div className="row"><Button variant="secondary" disabled={busy || !dirty || !title.trim()} onClick={() => void save()}>{t('Сохранить')}</Button><Button disabled={busy || !title.trim()} onClick={() => void publish()}>{t(item.status === 'PUBLISHED' ? 'Обновить публикацию' : 'Опубликовать')}</Button></div><Notice text={message} kind={message === t('Черновик сохранён') || message === t('Практика опубликована') ? 'success' : 'error'}/></div></div>
 }

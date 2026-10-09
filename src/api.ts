@@ -1,16 +1,17 @@
 export type TrackRef = { id: number; short_id: string; title: string }
 export type User = { id: number; email: string; first_name: string; last_name: string; role: 'STUDENT' | 'ADMIN'; learning_track: TrackRef | null; date_joined?: string }
 export type Track = { id: number; short_id: string; title: string; description: string; cover: number | null; is_published: boolean; is_active: boolean; is_system: boolean }
-export type Course = { id: number; short_id: string; learning_track: number | null; title: string; slug: string; description: string; cover: number | null; position: number; is_published: boolean }
-export type Module = { id: number; short_id: string; course: number; title: string; description: string; position: number; is_published: boolean }
-export type Lesson = { id: number; short_id: string; module: number; title: string; description: string; position: number; status: 'DRAFT' | 'PUBLISHED' }
-export type LearningItem = { id: number; short_id: string; module: number; module_short_id?: string; module_title?: string; module_position?: number; course_id?: number; course_short_id?: string; course_title?: string; type: 'LECTURE' | 'TEST' | 'PRACTICE'; title: string; description: string; position: number; status: 'DRAFT' | 'PUBLISHED'; lesson: number | null; lesson_short_id: string | null; test: number | null; practice: number | null }
+export type Course = { id: number; short_id: string; learning_track: number | null; title: string; slug: string; description: string; cover: number | null; position: number; is_published: boolean; adaptive_learning_enabled?: boolean }
+export type Module = { id: number; short_id: string; course: number; title: string; description: string; position: number; is_published: boolean; adaptive_threshold?: number; is_locked?: boolean }
+export type Lesson = { id: number; short_id: string; module: number; title: string; description: string; position: number; status: 'DRAFT' | 'PUBLISHED'; is_locked?: boolean }
+export type LearningItem = { id: number; short_id: string; module: number; module_short_id?: string; module_title?: string; module_position?: number; course_id?: number; course_short_id?: string; course_title?: string; type: 'LECTURE' | 'TEST' | 'PRACTICE'; title: string; description: string; position: number; status: 'DRAFT' | 'PUBLISHED'; lesson: number | null; lesson_short_id: string | null; test: number | null; practice: number | null; practice_criteria?: string[]; is_locked?: boolean }
 export type Block = { id?: number; type: 'TEXT' | 'IMAGE'; position: number; content: string; media: number | null; media_url?: string | null; config: Record<string, unknown> }
 export type Option = { id?: number; text: string; position: number; is_correct?: boolean }
-export type Question = { id?: number; text: string; position: number; points: number; options: Option[] }
+export type Question = { id?: number; text: string; position: number; points: number; competency?: string; options: Option[] }
 export type Test = { id?: number; lesson?: number; title: string; description: string; passing_percent: number; max_attempts: number | null; is_published?: boolean; version?: number; questions: Question[] }
-export type Attempt = { id: number; test: number; test_version: number; answers: { question: number; option: number }[]; snapshot: { question: string; selected: string; correct: string; points: number }[]; earned_points: number; total_points: number; percent: number; passed: boolean; completed_at: string }
-export type CourseProgress = { percent: number; items: Record<string, { progress_percent: number; is_completed: boolean }> }
+export type AdaptiveResult = { readiness: number; threshold: number; module_passed: boolean; module_completed: boolean; theory: number; practice: number; errors: number; competency: number; competencies: Record<string, number>; module_short_id: string; repeat_item_short_id: string; next_item_short_id: string | null }
+export type Attempt = { id: number; test: number; test_version: number; answers: { question: number; option: number }[]; snapshot: { question: string; selected: string; correct: string; points: number }[]; earned_points: number; total_points: number; percent: number; passed: boolean; completed_at: string; adaptive_result?: AdaptiveResult | null }
+export type CourseProgress = { percent: number; items: Record<string, { progress_percent: number; is_completed: boolean }>; modules?: Record<string, { id: number; status: 'locked' | 'completed' | 'repeat' | 'available'; is_locked: boolean; is_completed: boolean; threshold: number; readiness: number | null; attempts: number }> }
 export type Page<T> = { count: number; next: string | null; previous: string | null; results: T[] }
 
 function cookie(name: string) { return document.cookie.split('; ').find(x => x.startsWith(name + '='))?.split('=')[1] || '' }

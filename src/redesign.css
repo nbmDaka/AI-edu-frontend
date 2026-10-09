@@ -102,6 +102,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .module-lesson-list { display: grid; margin-top: 17px; border-top: 1px solid #eef0f4; }
 .module-lesson-list a { display: flex; align-items: center; gap: 12px; padding: 13px 4px; border-bottom: 1px solid #eef0f4; color: #5a667a; }
 .module-lesson-list a:hover { color: var(--color-primary); }
+.module-lesson-list .locked-learning-item { display: flex; align-items: center; gap: 12px; padding: 13px 4px; border-bottom: 1px solid #eef0f4; color: var(--color-subtle); }
+.module-lock-message { color: var(--color-subtle); font-size: .8rem; }
+.outline-lesson.is-locked { opacity: .55; cursor: default; }
+.outline-lesson.is-locked:hover { background: transparent; }
+.adaptive-indicators { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 18px; margin: 15px 0; font-size: .82rem; }
+.practice-checks { display: grid; gap: 12px; margin: 16px 0; }
+.practice-checks label { display: flex; flex-direction: row; align-items: flex-start; gap: 10px; }
+.practice-checks input { flex: none; margin-top: 4px; accent-color: var(--color-primary); }
 .lesson-list-icon { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; border-radius: 10px; background: #f3f5f9; }
 .module-lesson-copy { display: grid; gap: 3px; flex: 1; }
 .module-lesson-copy strong { color: var(--color-ink); font-size: .86rem; }

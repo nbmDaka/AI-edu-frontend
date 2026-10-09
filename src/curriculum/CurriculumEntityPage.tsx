@@ -19,6 +19,8 @@ type Form = {
   course: number
   slug: string
   cover: number | null
+  adaptive_learning_enabled: boolean
+  adaptive_threshold: number
 }
 
 function toForm(item: Course | Module, kind: Kind): Form {
@@ -28,6 +30,8 @@ function toForm(item: Course | Module, kind: Kind): Form {
     course: kind === 'module' ? (item as Module).course : 0,
     slug: kind === 'course' ? (item as Course).slug : '',
     cover: kind === 'course' ? (item as Course).cover : null,
+    adaptive_learning_enabled: kind === 'course' ? (item as Course).adaptive_learning_enabled ?? false : false,
+    adaptive_threshold: kind === 'module' ? (item as Module).adaptive_threshold ?? 60 : 60,
   }
 }
 
@@ -75,8 +79,8 @@ export function CurriculumEntityPage({ kind }: { kind: Kind }) {
     setBusy(true); setMessage('')
     try {
       const payload = kind === 'course'
-        ? { title: form.title.trim(), description: form.description, learning_track: form.learning_track, cover: form.cover, position: form.position, is_published: form.is_published }
-        : { title: form.title.trim(), description: form.description, course: form.course, position: form.position, is_published: form.is_published }
+        ? { title: form.title.trim(), description: form.description, learning_track: form.learning_track, cover: form.cover, position: form.position, is_published: form.is_published, adaptive_learning_enabled: form.adaptive_learning_enabled }
+        : { title: form.title.trim(), description: form.description, course: form.course, position: form.position, is_published: form.is_published, adaptive_threshold: form.adaptive_threshold }
       const saved = await api<Course | Module>(`${kind}s/${id}/`, 'PATCH', payload)
       setForm(toForm(saved, kind)); setDirty(false); setIsError(false); setMessage(t('Изменения сохранены'))
       await Promise.all(['courses', 'modules', 'items'].map(key => queryClient.invalidateQueries({ queryKey: ['admin', key] })))
@@ -108,6 +112,7 @@ export function CurriculumEntityPage({ kind }: { kind: Kind }) {
         <label>{t('Порядок отображения')}<Input type="number" min="0" value={form.position} onChange={event => update({ position: Math.max(0, Number(event.target.value) || 0) })}/></label>
         <label className="curriculum-publish-setting"><input type="checkbox" checked={form.is_published} onChange={event => update({ is_published: event.target.checked })}/><span><strong>{t('Опубликован')}</strong><small>{t('Материал станет доступен студентам, когда опубликованы его родительские разделы.')}</small></span></label>
       </section>
+      <section className="curriculum-form-section"><h2>{t('Адаптивное обучение')}</h2>{kind === 'course' ? <label className="curriculum-publish-setting"><input type="checkbox" checked={form.adaptive_learning_enabled} onChange={event => update({ adaptive_learning_enabled: event.target.checked })}/><span><strong>{t('Открывать модули последовательно')}</strong><small>{t('Следующий модуль откроется после достижения порога готовности в итоговом тесте.')}</small></span></label> : <><label>{t('Порог готовности, %')}<Input type="number" min="40" max="80" value={form.adaptive_threshold} onChange={event => update({ adaptive_threshold: Number(event.target.value) })}/></label><p>{t('По умолчанию 60%. Допустимый диапазон: 40–80%. Настройка действует при включённом адаптивном обучении в курсе.')}</p></>}</section>
       {kind === 'course' && <section className="curriculum-form-section"><h2>{t('Обложка курса')}</h2><p>{t('Изображение показывается в каталоге студентам.')}</p>{form.cover && <div className="curriculum-cover-preview"><img src={`/api/v1/media/${form.cover}/`} alt={t('Обложка курса')}/><button aria-label={t('Убрать обложку')} onClick={() => update({ cover: null })}><X size={16}/></button></div>}<label className="curriculum-cover-upload"><ImagePlus size={18}/>{t(form.cover ? 'Заменить изображение' : 'Загрузить изображение')}<input type="file" accept="image/png,image/jpeg,image/webp" disabled={uploading} onChange={event => { const file = event.target.files?.[0]; if (file) void uploadCover(file); event.currentTarget.value = '' }}/></label></section>}
     </div>
     <div className="curriculum-form-footer"><span>{t(dirty ? 'Есть несохранённые изменения' : 'Все изменения сохранены')}</span><Button onClick={() => void save()} disabled={!dirty || busy || uploading || !form.title.trim() || (kind === 'course' && !form.learning_track)}><Save size={16}/>{busy ? t('Сохранение…') : t('Сохранить')}</Button></div>
