@@ -1,4 +1,7 @@
 export type TrackRef = { id: number; short_id: string; title: string }
+export type CourseAccessMode = 'TRACK_DEFAULT' | 'CUSTOM'
+export type AdminUser = { id: number; email: string; first_name: string; last_name: string; role: 'STUDENT' | 'ADMIN'; is_active: boolean; learning_track: number | null; learning_track_title: string | null; course_access_mode: CourseAccessMode; course_ids: number[]; accessible_course_count: number; is_protected: boolean; date_joined: string; last_login: string | null }
+export type AdminLearningProgress = { id: number; item_title: string; item_type: 'LECTURE' | 'TEST' | 'PRACTICE'; course_title: string; module_title: string; progress_percent: number; is_completed: boolean; completed_at: string | null; updated_at: string }
 export type User = { id: number; email: string; first_name: string; last_name: string; role: 'STUDENT' | 'ADMIN'; learning_track: TrackRef | null; date_joined?: string }
 export type Track = { id: number; short_id: string; title: string; description: string; cover: number | null; is_published: boolean; is_active: boolean; is_system: boolean }
 export type Course = { id: number; short_id: string; learning_track: number | null; title: string; slug: string; description: string; cover: number | null; position: number; is_published: boolean; adaptive_learning_enabled?: boolean }
@@ -16,6 +19,12 @@ export type Page<T> = { count: number; next: string | null; previous: string | n
 
 function cookie(name: string) { return document.cookie.split('; ').find(x => x.startsWith(name + '='))?.split('=')[1] || '' }
 export class ApiError extends Error { constructor(message: string, public status: number) { super(message) } }
+function errorMessage(value: unknown): string {
+  if (typeof value === 'string') return value
+  if (Array.isArray(value)) return value.map(errorMessage).join(' ')
+  if (value && typeof value === 'object') return Object.values(value).map(errorMessage).join(' ')
+  return translateCurrentLocale('Ошибка запроса')
+}
 export async function api<T>(path: string, method = 'GET', data?: unknown): Promise<T> {
   if (method !== 'GET' && !cookie('csrftoken')) await fetch('/api/v1/csrf/', { credentials: 'include' })
   const body = data instanceof FormData ? data : data === undefined ? undefined : JSON.stringify(data)
@@ -30,7 +39,7 @@ export async function api<T>(path: string, method = 'GET', data?: unknown): Prom
     const payload = await res.json().catch(() => ({}))
     const rawDetail = payload.error?.detail ?? payload.detail
     const detail = typeof rawDetail === 'object' && rawDetail !== null && 'file' in rawDetail ? (rawDetail as { file: unknown }).file : rawDetail ?? translateCurrentLocale('Ошибка запроса')
-    throw new ApiError(typeof detail === 'string' ? detail : JSON.stringify(detail), res.status)
+    throw new ApiError(errorMessage(detail), res.status)
   }
   return res.status === 204 ? undefined as T : res.json()
 }

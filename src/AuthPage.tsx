@@ -58,8 +58,9 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
           ? values
           : { email: values.email, password: values.password }
       )
+      qc.clear()
       qc.setQueryData(['me'], user)
-      navigate(user.role === 'ADMIN' ? '/admin' : '/')
+      navigate(user.role === 'ADMIN' ? '/admin/curriculum' : '/')
     } catch (e) {
       setError((e as Error).message)
     }

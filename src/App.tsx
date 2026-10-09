@@ -4,8 +4,13 @@ import { Link, Navigate, Route, Routes } from 'react-router-dom'
 import { BookOpen, Layers3 } from 'lucide-react'
 import { api, apiAll, type Course, type User } from './api'
 import { MainLayout } from './layouts/MainLayout'
+import { AdminLayout } from './layouts/AdminLayout'
 import { ErrorState, Loading } from './components/ui'
 import { useI18n } from './i18n'
+
+const UsersPage = lazy(() => import('./admin/UsersPage').then(module => ({ default: module.UsersPage })))
+const UserDetailPage = lazy(() => import('./admin/UserDetailPage').then(module => ({ default: module.UserDetailPage })))
+const AdminProfilePage = lazy(() => import('./admin/AdminProfilePage').then(module => ({ default: module.AdminProfilePage })))
 
 const AuthPage = lazy(() => import('./AuthPage').then(module => ({ default: module.AuthPage })))
 const CatalogPage = lazy(() => import('./StudentPages').then(module => ({ default: module.CatalogPage })))
@@ -37,18 +42,10 @@ function Home({ user }: { user: User }) {
   </>
 }
 
-function AdminHome() {
-  const { t } = useI18n()
-  return <><div className="page-heading-row"><div><span className="eyebrow">{t('РАБОЧЕЕ ПРОСТРАНСТВО')}</span><h1>{t('Администрирование')}</h1><p>{t('Управляйте контентом и учебными материалами платформы.')}</p></div></div><div className="admin-home-grid">
-    <Link to="/admin/curriculum" className="admin-home-card"><span className="quick-link-icon"><Layers3 size={21}/></span><h2>{t('Учебная программа')}</h2><p>{t('Организуйте траектории, модули и уроки в единой структуре.')}</p><span className="card-link">{t('Открыть программу')} <span aria-hidden="true">→</span></span></Link>
-    <Link to="/admin/curriculum" className="admin-home-card"><span className="quick-link-icon"><BookOpen size={21}/></span><h2>{t('Конструктор уроков')}</h2><p>{t('Создавайте лекции, добавляйте изображения и настраивайте тесты.')}</p><span className="card-link">{t('Перейти к урокам')} <span aria-hidden="true">→</span></span></Link>
-  </div></>
-}
-
-function ProtectedPage({ user, children, admin = false }: { user: User | null | undefined; children: React.ReactNode; admin?: boolean }) {
+export function ProtectedPage({ user, children, admin = false }: { user: User | null | undefined; children: React.ReactNode; admin?: boolean }) {
   if (!user) return <Navigate to="/login" replace/>
   if (admin && user.role !== 'ADMIN') return <Navigate to="/" replace/>
-  return <MainLayout user={user}>{children}</MainLayout>
+  return user.role === 'ADMIN' ? <AdminLayout user={user}>{children}</AdminLayout> : <MainLayout user={user}>{children}</MainLayout>
 }
 
 export default function App() {
@@ -58,25 +55,28 @@ export default function App() {
   if (isLoading) return <Loading fullPage label={t('Загрузка платформы…')} description={t('Подготовка образовательного пространства…')} />
   if (error) return <ErrorState error={error}/>
   return <Suspense fallback={<Loading fullPage label={t('Загрузка страницы…')} />}><Routes>
-    <Route path="/login" element={user ? <Navigate to={user.role === 'ADMIN' ? '/admin' : '/'} replace/> : <AuthPage mode="login"/>}/>
-    <Route path="/register" element={user ? <Navigate to="/" replace/> : <AuthPage mode="register"/>}/>
-    <Route path="/" element={<ProtectedPage user={user}><Home user={user!}/></ProtectedPage>}/>
+    <Route path="/login" element={user ? <Navigate to={user.role === 'ADMIN' ? '/admin/curriculum' : '/'} replace/> : <AuthPage mode="login"/>}/>
+    <Route path="/register" element={user ? <Navigate to={user.role === 'ADMIN' ? '/admin/curriculum' : '/'} replace/> : <AuthPage mode="register"/>}/>
+    <Route path="/" element={<ProtectedPage user={user}>{user?.role === 'ADMIN' ? <Navigate to="/admin/curriculum" replace/> : <Home user={user!}/>}</ProtectedPage>}/>
     <Route path="/catalog" element={<ProtectedPage user={user}><CatalogPage/></ProtectedPage>}/>
     <Route path="/courses/:slug" element={<ProtectedPage user={user}><CoursePage/></ProtectedPage>}/>
     <Route path="/lessons/:id" element={user ? <LessonPage/> : <Navigate to="/login" replace/>}/>
     <Route path="/items/:id" element={user ? <LearningItemPage/> : <Navigate to="/login" replace/>}/>
-    <Route path="/profile" element={<ProtectedPage user={user}><ProfilePage user={user!}/></ProtectedPage>}/>
-    <Route path="/admin" element={<ProtectedPage user={user} admin><AdminHome/></ProtectedPage>}/>
+    <Route path="/profile" element={<ProtectedPage user={user}>{user?.role === 'ADMIN' ? <Navigate to="/admin/profile" replace/> : <ProfilePage user={user!}/>}</ProtectedPage>}/>
+    <Route path="/admin" element={<ProtectedPage user={user} admin><Navigate to="/admin/curriculum" replace/></ProtectedPage>}/>
+    <Route path="/admin/users" element={<ProtectedPage user={user} admin><UsersPage user={user!}/></ProtectedPage>}/>
+    <Route path="/admin/users/:id" element={<ProtectedPage user={user} admin><UserDetailPage actor={user!}/></ProtectedPage>}/>
+    <Route path="/admin/profile" element={<ProtectedPage user={user} admin><AdminProfilePage user={user!}/></ProtectedPage>}/>
     <Route path="/admin/curriculum" element={<ProtectedPage user={user} admin><AdminCurriculum/></ProtectedPage>}/>
     <Route path="/admin/curriculum/courses/:courseId" element={<ProtectedPage user={user} admin><CurriculumEntityPage kind="course"/></ProtectedPage>}/>
     <Route path="/admin/curriculum/modules/:moduleId" element={<ProtectedPage user={user} admin><CurriculumEntityPage kind="module"/></ProtectedPage>}/>
-    <Route path="/admin/curriculum/lessons/:id/edit" element={user?.role === 'ADMIN' ? <EditorPage/> : <Navigate to="/" replace/>}/>
-    <Route path="/admin/curriculum/items/:id/edit" element={user?.role === 'ADMIN' ? <LearningItemEditorPage/> : <Navigate to="/" replace/>}/>
+    <Route path="/admin/curriculum/lessons/:id/edit" element={<ProtectedPage user={user} admin><EditorPage/></ProtectedPage>}/>
+    <Route path="/admin/curriculum/items/:id/edit" element={<ProtectedPage user={user} admin><LearningItemEditorPage/></ProtectedPage>}/>
     <Route path="/admin/tracks" element={<Navigate to="/admin/curriculum" replace/>}/>
     <Route path="/admin/modules" element={<Navigate to="/admin/curriculum" replace/>}/>
     <Route path="/admin/lessons" element={<Navigate to="/admin/curriculum" replace/>}/>
-    <Route path="/admin/lessons/:id/edit" element={user?.role === 'ADMIN' ? <EditorPage/> : <Navigate to="/" replace/>}/>
-    <Route path="/admin/lessons/:id/test" element={user?.role === 'ADMIN' ? <TestEditor/> : <Navigate to="/" replace/>}/>
+    <Route path="/admin/lessons/:id/edit" element={<ProtectedPage user={user} admin><EditorPage/></ProtectedPage>}/>
+    <Route path="/admin/lessons/:id/test" element={<ProtectedPage user={user} admin><TestEditor/></ProtectedPage>}/>
     <Route path="*" element={<Navigate to="/" replace/>}/>
   </Routes></Suspense>
 }

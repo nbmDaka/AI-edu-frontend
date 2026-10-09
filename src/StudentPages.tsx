@@ -124,7 +124,7 @@ export function LearningItemPage() {
   </LearningLayout>
 }
 
-function PasswordSection() {
+export function PasswordSection() {
   const { t } = useI18n()
   const [current, setCurrent] = useState(''), [next, setNext] = useState(''), [message, setMessage] = useState('')
   const save = async () => {
