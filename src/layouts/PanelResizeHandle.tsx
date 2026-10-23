@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import { useI18n } from '../i18n'
 
-const MIN_WIDTH = 260, MAX_WIDTH = 560, DEFAULT_WIDTH = 300
+const MIN_WIDTH = 300, MAX_WIDTH = 560, DEFAULT_WIDTH = 340
 
 export function PanelResizeHandle({ panel, width, onResize }: {
   panel: RefObject<HTMLElement | null>; width: number; onResize: (width: number) => void
@@ -20,8 +20,8 @@ export function PanelResizeHandle({ panel, width, onResize }: {
 
   return <div className={`learning-panel-resizer ${dragging ? 'is-dragging' : ''}`} role="separator"
     aria-label={t('Изменить ширину панели тьютора')} aria-orientation="vertical" aria-controls="learning-tutor-panel"
-    aria-valuemin={MIN_WIDTH} aria-valuemax={MAX_WIDTH} aria-valuenow={width} tabIndex={0}
-    title={t('Перетащите границу. Двойной щелчок — исходная ширина.')}
+    aria-valuemin={MIN_WIDTH} aria-valuemax={bounds()} aria-valuenow={Math.min(width, bounds())} tabIndex={0}
+    title={t('Перетащите границу. Двойной щелчок - исходная ширина.')}
     onPointerDown={event => {
       if (event.button !== 0 || !event.isPrimary) return
       event.preventDefault()

@@ -32,8 +32,8 @@ export function LearningLayout({ children, tutor, workspace = false, assessment 
   const [tutorWidth, setTutorWidth] = useState(() => {
     try {
       const value = Number(localStorage.getItem('learning-tutor-width'))
-      return value >= 260 && value <= 560 ? value : 300
-    } catch { return 300 }
+      return value >= 300 && value <= 560 ? value : 340
+    } catch { return 340 }
   })
   const tutorPanelRef = useRef<HTMLElement>(null)
   const centerRef = useRef<HTMLDivElement>(null)
@@ -99,8 +99,11 @@ export function LearningLayout({ children, tutor, workspace = false, assessment 
         <button type="button" className="outline-module-toggle" aria-expanded={open} aria-controls={`outline-module-${section.module.id}`} onClick={() => setExpanded(current => ({ ...current, [section.module.id]: !open }))}><span><small>{t('Модуль')} {sectionIndex + 1}</small><strong>{section.module.title}</strong></span><ChevronDown size={18} className={open ? 'is-expanded' : ''}/></button>
         <div id={`outline-module-${section.module.id}`} hidden={!open}>{section.lessons.map(item => {
           const state = itemProgress[item.short_id], locked = section.module.is_locked || item.is_locked
-          const content = <><LearningStatus locked={locked} completed={state?.is_completed} percent={state?.progress_percent} started={state?.is_started} iconOnly size={21}/><span className="outline-entry-copy"><span className="outline-lesson-title">{item.title}</span><small>{'type' in item && item.type === 'PRACTICE' ? <Code2 size={12}/> : 'type' in item && item.type === 'TEST' ? <CircleCheck size={12}/> : <BookOpen size={12}/>} {t(typeLabel(item))}</small></span></>
-          return locked ? <div key={item.short_id} className="outline-lesson is-locked" aria-disabled="true" title={t('Сначала завершите предыдущий модуль')}>{content}</div> : <Link key={item.short_id} to={entryHref(item)} onClick={() => setDrawerOpen(false)} className={`outline-lesson ${item.short_id === lessonId ? 'active' : ''}`} aria-current={item.short_id === lessonId ? 'page' : undefined}>{content}</Link>
+          const active = item.short_id === lessonId
+          const number = /(?:лекция|практическая\s+работа|практика)\s*№?\s*(\d+)/i.exec(item.title)?.[1]
+            ?? section.lessons.filter(entry => typeLabel(entry) === typeLabel(item)).findIndex(entry => entry.short_id === item.short_id) + 1
+          const content = <><LearningStatus locked={locked} completed={state?.is_completed} percent={state?.progress_percent} started={state?.is_started} iconOnly size={21}/><span className="outline-entry-copy"><span className="outline-lesson-title" title={item.title}>{active ? `${t(typeLabel(item))} ${number}` : item.title}</span><small>{'type' in item && item.type === 'PRACTICE' ? <Code2 size={12}/> : 'type' in item && item.type === 'TEST' ? <CircleCheck size={12}/> : <BookOpen size={12}/>} {t(typeLabel(item))}</small></span></>
+          return locked ? <div key={item.short_id} className="outline-lesson is-locked" aria-disabled="true" title={t('Сначала завершите предыдущий модуль')}>{content}</div> : <Link key={item.short_id} to={entryHref(item)} onClick={() => setDrawerOpen(false)} className={`outline-lesson ${item.short_id === lessonId ? 'active' : ''}`} aria-label={active ? item.title : undefined} aria-current={item.short_id === lessonId ? 'page' : undefined}>{content}</Link>
         })}</div>
       </section>
     })}</nav>
@@ -109,10 +112,10 @@ export function LearningLayout({ children, tutor, workspace = false, assessment 
   const showOutline = !assessment && !compact && desktopOpen
   const showRail = !assessment && !showOutline
   const percent = Math.min(100, Math.max(0, courseProgress ?? 0))
-  return <div style={workspace ? { '--learning-tutor-width': `${tutorWidth}px` } as CSSProperties : undefined} className={`learning-layout ${workspace ? 'is-document-workspace' : ''} ${assessment ? 'is-assessment' : ''} ${showOutline ? 'has-course-outline' : showRail ? 'has-course-rail' : ''} ${tutor && !assessment ? 'has-lecture-tutor' : ''}`}>
+  return <div style={{ '--learning-tutor-width': `${tutorWidth}px` } as CSSProperties} className={`learning-layout ${workspace ? 'is-document-workspace' : ''} ${assessment ? 'is-assessment' : ''} ${showOutline ? 'has-course-outline' : showRail ? 'has-course-rail' : ''} ${tutor && !assessment ? 'has-lecture-tutor' : ''}`}>
     {!assessment && <header className="learning-header" inert={drawerOpen || tutorOpen}>
       <Link to={courseSlug ? `/courses/${courseSlug}` : '/catalog'} className="learning-back" aria-label={t(courseSlug ? 'Вернуться к курсу' : 'Вернуться в каталог')}><ArrowLeft size={17}/><span>{t(courseSlug ? 'К курсу' : 'Каталог')}</span></Link>
-      <nav className="learning-header-title learning-breadcrumbs" aria-label={t('Путь обучения')}>{courseTitle && <Link to={courseSlug ? `/courses/${courseSlug}` : '/catalog'}>{courseTitle}</Link>}<span>{moduleTitle && <>{moduleTitle} <span aria-hidden="true">›</span> </>}<strong aria-current="page">{lessonTitle}</strong></span></nav>
+      <nav className="learning-header-title learning-breadcrumbs" aria-label={t('Путь обучения')}>{courseTitle && <Link to={courseSlug ? `/courses/${courseSlug}` : '/catalog'}>{courseTitle}</Link>}{moduleTitle && <span>{moduleTitle}</span>}</nav>
       <div className="learning-header-tools"><LanguageSelect compact/>{tutor && <button className="button secondary tutor-toggle" title={t('Открыть тьютора')} aria-label={t('Открыть тьютора')} aria-expanded={tutorOpen} onClick={() => setTutorOpen(true)}><Sparkles size={17}/><span>{t('Тьютор')}</span></button>}{user && <div className="workspace-account"><AccountMenu user={user}/></div>}</div>
     </header>}
     <div className="learning-workspace" inert={drawerOpen || tutorOpen}>
@@ -121,9 +124,9 @@ export function LearningLayout({ children, tutor, workspace = false, assessment 
         <button ref={triggerRef} type="button" className="outline-rail-trigger" onClick={() => { if (compact) setDrawerOpen(true); else { focusOutlinePanel.current = true; setOutlineVisible(true) } }} aria-label={t('Содержание')} title={t('Содержание')} aria-expanded={compact ? drawerOpen : false} aria-haspopup={compact ? 'dialog' : undefined}><PanelLeftOpen size={19}/><ChevronRight size={16}/></button>
         {courseProgress !== undefined && <div className="outline-rail-progress" role="progressbar" aria-label={t('Прогресс курса')} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent} title={`${t('Ваш прогресс')}: ${percent}%`}><strong>{percent}%</strong><span className="outline-rail-progress-track" aria-hidden="true"><span style={{ width: `${percent}%` }}/></span></div>}
       </div></aside>}
-      <div ref={centerRef} className="learning-center"><main className="learning-main">{children}</main>{!hideNext && <div className="learning-next-bar"><NextItemAction next={next} courseSlug={courseSlug}/></div>}</div>
+      <div ref={centerRef} className="learning-center"><main className="learning-main" aria-label={lessonTitle}>{children}</main>{!hideNext && <div className="learning-next-bar"><NextItemAction next={next} courseSlug={courseSlug}/></div>}</div>
       {tutor && !assessment && !tutorOpen && <aside ref={tutorPanelRef} id="learning-tutor-panel" className="learning-tutor" aria-label={t('AI Tutor')}>
-        {workspace && <PanelResizeHandle panel={tutorPanelRef} width={tutorWidth} onResize={resizeTutor}/>}{tutor}
+        <PanelResizeHandle panel={tutorPanelRef} width={tutorWidth} onResize={resizeTutor}/>{tutor}
       </aside>}
     </div>
     {drawerOpen && compact && <div className="outline-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) setDrawerOpen(false) }}><aside ref={drawerRef} role="dialog" aria-modal="true" id="course-outline" className="course-outline mobile-outline" aria-label={t('Содержание курса')}>{outline}</aside></div>}

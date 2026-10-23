@@ -8,9 +8,9 @@
 .is-document-workspace .learning-workspace > .desktop-outline, .is-document-workspace .course-outline-rail, .is-document-workspace .learning-workspace > .learning-tutor { position: relative; top: 0; height: 100%; min-height: 0; }
 .is-document-workspace .tutor-suggestions button { padding: 8px 10px; font-size: .75rem; }
 @media (min-width: 1251px) {
-  .learning-layout.is-document-workspace.has-lecture-tutor .learning-workspace { grid-template-columns: minmax(0, 1fr) clamp(260px, var(--learning-tutor-width, 300px), 38vw); }
-  .learning-layout.is-document-workspace.has-course-outline.has-lecture-tutor .learning-workspace { grid-template-columns: 260px minmax(420px, 1fr) clamp(260px, var(--learning-tutor-width, 300px), calc(100vw - 680px)); }
-  .learning-layout.is-document-workspace.has-course-rail.has-lecture-tutor .learning-workspace { grid-template-columns: 56px minmax(420px, 1fr) clamp(260px, var(--learning-tutor-width, 300px), calc(100vw - 476px)); }
+  .learning-layout.is-document-workspace.has-lecture-tutor .learning-workspace { grid-template-columns: minmax(420px, 1fr) clamp(300px, var(--learning-tutor-width, 340px), min(560px, calc(100vw - 420px))); }
+  .learning-layout.is-document-workspace.has-course-outline.has-lecture-tutor .learning-workspace { grid-template-columns: 260px minmax(420px, 1fr) clamp(300px, var(--learning-tutor-width, 340px), min(560px, calc(100vw - 680px))); }
+  .learning-layout.is-document-workspace.has-course-rail.has-lecture-tutor .learning-workspace { grid-template-columns: 56px minmax(420px, 1fr) clamp(300px, var(--learning-tutor-width, 340px), min(560px, calc(100vw - 476px))); }
 }
 .is-document-workspace .learning-center .lesson-navigation { width: calc(100% - 48px); max-width: none; }
 .is-document-workspace .outline-button { display: inline-flex; }

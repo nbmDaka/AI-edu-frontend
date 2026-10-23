@@ -159,7 +159,7 @@ function TutorConversation({ storageKey, contextType, contextId, lessonTitle, ma
   }
   const onSubmit = (event: FormEvent) => { event.preventDefault(); void submit(draft) }
 
-  return <section className="tutor-panel" aria-label={t('Диалог с тьютором')}>
+  return <section className="tutor-panel" aria-label={`${t('Диалог с тьютором')}: ${lessonTitle}`}>
     <header className="tutor-panel-header"><div className="tutor-heading"><Sparkles size={18}/><h2>{t('ИИ-тьютор')}</h2></div>
       <div className="tutor-header-actions">
       {localAvatarEnabled && <button type="button" className={`icon-button tutor-call ${live.enabled ? 'connected' : ''}`} title={live.enabled || live.starting ? 'Завершить разговор' : 'Начать разговор'} aria-label={live.enabled || live.starting ? 'Завершить разговор' : 'Начать разговор'} aria-pressed={live.enabled} disabled={locale !== 'ru' || !avatar.ready} onClick={() => {
@@ -169,7 +169,6 @@ function TutorConversation({ storageKey, contextType, contextId, lessonTitle, ma
       <button type="button" className="icon-button" title={t(locale !== 'ru' ? 'Озвучка доступна на русском' : 'Автоматическая озвучка')} aria-label={t('Автоматическая озвучка')} aria-pressed={autoSpeak} disabled={locale !== 'ru' || busy || live.enabled || live.starting} onClick={() => { if (!autoSpeak) { voice.unlockAudio(); avatar.unlock() } else { voice.stopSpeech(); avatar.stop() } setAutoSpeak(!autoSpeak) }}>{autoSpeak ? <Volume2 size={16}/> : <VolumeX size={16}/>}</button>
       <button type="button" className="icon-button" title={t('Очистить диалог')} aria-label={t('Очистить диалог')} disabled={!conversation.messages.length && !busy} onClick={clear}><Trash2 size={16}/></button></div>
     </header>
-    <p className="tutor-lesson" title={lessonTitle}>{lessonTitle}</p>
     {avatar.portrait}
     <div className="tutor-messages" ref={listRef} role="log" aria-live="polite" aria-busy={busy} onScroll={() => {
       const node = listRef.current
