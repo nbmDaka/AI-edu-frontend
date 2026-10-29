@@ -2,7 +2,7 @@ import { createServer } from 'vite'
 import { createReadStream, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
-const model = fileURLToPath(new URL('../../../avatar/MetaHumanTeacher/Saved/WebExport/characters/teacher/03-glb/teacher-browser.glb', import.meta.url))
+const model = process.env.TEACHER_PREVIEW_MODEL || fileURLToPath(new URL('../../../avatar/MetaHumanTeacher/Saved/WebExport/characters/teacher/03-glb/teacher-browser.glb', import.meta.url))
 const assets = new Map([
   ['/__teacher.glb', [model, 'model/gltf-binary']],
   ['/__cedar.wav', [fileURLToPath(new URL('../../../avatar/MetaHumanTeacher/Saved/Authoring/VoiceSamples/teacher-cedar.wav', import.meta.url)), 'audio/wav']],

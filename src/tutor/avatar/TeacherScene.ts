@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
+import { configureTeacherCards } from './teacher-materials'
 
 type FaceMesh = THREE.Mesh & {
   morphTargetDictionary: Record<string, number>
@@ -103,14 +104,7 @@ export class TeacherScene {
           material.customProgramCacheKey = () => 'eduai-metahuman-eye-pupil-v1'
           material.needsUpdate = true
         }
-        if (material instanceof THREE.MeshStandardMaterial && /hair|eyebrows|eyelashes/i.test(material.name)) {
-          material.side = THREE.DoubleSide
-          material.alphaTest = /eyelashes/i.test(material.name) ? 0.15 : 0.12
-          material.transparent = false
-          material.depthWrite = true
-          material.forceSinglePass = true
-          material.needsUpdate = true
-        }
+        if (material instanceof THREE.MeshStandardMaterial) configureTeacherCards(material)
       }
     })
     if (!this.meshes.some(mesh => Object.keys(mesh.morphTargetDictionary).some(name => canonical(name) === 'jawopen'))) {
