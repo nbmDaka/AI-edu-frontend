@@ -26,3 +26,4 @@
 @media(max-width:900px){.admin-shell .lesson-settings-panel{z-index:80;top:0;height:100dvh}}
 
 .admin-shell .curriculum-title-row h1{font-size:28px;margin:0 0 5px}.admin-dialog-heading h2{min-width:0}.admin-dialog-heading button{flex-shrink:0}
+@media(max-width:760px){.admin-header .main-nav{flex-wrap:wrap;row-gap:4px}}

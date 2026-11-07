@@ -1,0 +1,33 @@
+.python-lab { display: grid; gap: 20px; min-width: 0; margin-top: 16px; }
+.python-lab-datasets { display: grid; gap: 8px; }
+.python-lab-datasets h3, .python-lab-datasets p { margin: 0; }
+.python-lab-hint { margin: 0; font-size: .85rem; }
+.python-lab-step { display: grid; gap: 12px; min-width: 0; padding: 20px; border: 1px solid var(--color-border, #dbe3ec); border-radius: 12px; background: var(--color-surface, white); }
+.python-lab-step header { display: grid; gap: 4px; }
+.python-lab-step header span { color: var(--color-primary, #4058af); font-size: .75rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.python-lab-step h3 { margin: 0; font-size: 1.05rem; overflow-wrap: anywhere; }
+.python-lab-instructions { margin: 0; white-space: pre-wrap; line-height: 1.6; }
+.python-code { width: 100%; min-width: 0; box-sizing: border-box; font: .85rem/1.55 Consolas, 'Cascadia Mono', 'Courier New', monospace; tab-size: 4; padding: 12px; border: 1px solid #cfd8e9; border-radius: var(--radius-control, 8px); background: #f7f9fc; color: var(--color-text, #17223b); resize: vertical; white-space: pre; overflow-x: auto; }
+.python-code:focus { outline: 2px solid var(--color-primary, #4058af); outline-offset: 1px; }
+.python-lab-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.python-lab-output { margin: 0; max-height: 360px; overflow: auto; padding: 12px; border-radius: 8px; background: #17223b; color: #e8eef8; font: .8rem/1.5 Consolas, 'Courier New', monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+.python-lab-output.is-error { border-left: 4px solid #d14343; }
+.python-lab-figure { display: block; max-width: 100%; height: auto; border: 1px solid var(--color-border, #dbe3ec); border-radius: 8px; background: white; }
+.python-lab-checks { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.python-lab-checks li { display: flex; align-items: flex-start; gap: 8px; font-size: .9rem; color: var(--color-muted, #67738a); }
+.python-lab-checks li svg { flex-shrink: 0; margin-top: 2px; }
+.python-lab-checks li span { display: grid; gap: 2px; min-width: 0; }
+.python-lab-checks li.is-passed { color: #1f7a4d; }
+.python-lab-checks li.is-failed { color: #b42318; }
+.python-lab-check-error { font-family: Consolas, 'Courier New', monospace; overflow-wrap: anywhere; }
+.python-lab-submit, .python-lab-result { display: grid; gap: 12px; justify-items: start; padding: 16px; border-radius: 12px; background: #edf6ff; }
+.python-lab-submit p, .python-lab-result p { margin: 0; display: flex; align-items: center; gap: 8px; }
+.python-lab-editor .python-lab-packages { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.python-lab-editor .python-lab-packages label { display: flex; align-items: center; gap: 6px; }
+.python-lab-step-editor { display: grid; gap: 12px; padding: 16px; border: 1px solid #e0e7ef; border-radius: 10px; min-width: 0; }
+.python-lab-step-editor h4 { margin: 4px 0 0; }
+.python-lab-check-editor { display: grid; grid-template-columns: minmax(140px, 1.2fr) minmax(140px, 1.4fr) minmax(90px, 1fr) 90px auto auto; align-items: center; gap: 8px; }
+.python-lab-check-editor > label { display: flex; align-items: center; gap: 6px; font-size: .85rem; white-space: nowrap; }
+.python-lab-check-head { font-size: .75rem; color: var(--color-muted, #67738a); }
+@media (max-width: 900px) { .python-lab-check-editor { grid-template-columns: 1fr 1fr; } .python-lab-check-head { display: none; } }
+@media (max-width: 520px) { .python-lab-check-editor { grid-template-columns: 1fr; } .python-lab-step { padding: 14px; } }

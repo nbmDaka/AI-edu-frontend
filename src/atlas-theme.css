@@ -177,7 +177,8 @@ h1, h2, h3 { color: var(--color-ink); letter-spacing: 0; }
   .main-layout .main-header-inner { flex-wrap: wrap; padding-block: 12px; row-gap: 10px; }
   .main-layout .brand { margin-right: auto; }
   .main-layout .main-nav { order: 4; flex-basis: 100%; justify-content: flex-start; overflow: visible; }
-  .main-layout .main-nav-link { flex: 1; justify-content: center; padding: 8px 6px; font-size: 12px; }
+  .main-layout .main-nav-link { flex: 1 1 auto; justify-content: center; padding: 8px 6px; font-size: 12px; white-space: nowrap; }
+  .main-layout .main-nav { flex-wrap: wrap; gap: 4px; }
   .main-layout .main-header-inner > .language-select, .main-layout .main-header-inner > .user-menu { margin-left: 0; }
 }
 @media (prefers-reduced-motion: reduce) {

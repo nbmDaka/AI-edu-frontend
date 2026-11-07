@@ -1,0 +1,22 @@
+.activity-filters{grid-template-columns:1fr 1.2fr 1.6fr auto}
+.activity-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+.activity-kpis .analytics-kpi>strong{margin:12px 0 4px;font-size:30px}
+.activity-user-filter{margin:0;font-size:13px;color:var(--color-muted)}
+.activity-days{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:6px;list-style:none;margin:20px 0 0;padding:0;height:180px;align-items:end}
+.activity-days li{display:grid;grid-template-rows:auto 1fr auto;height:100%;gap:4px;text-align:center;min-width:0}
+.activity-day-value{font-size:11px;font-variant-numeric:tabular-nums;color:var(--color-ink);min-height:14px}
+.activity-day-bar{display:flex;align-items:flex-end;background:#f3f5fa;border-radius:4px;overflow:hidden}
+.activity-day-bar i{display:block;width:100%;background:var(--analytics-teal);border-radius:4px 4px 0 0;min-height:0}
+.activity-day-label{font-size:10px;color:var(--color-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.activity-table thead th,.activity-table td,.activity-table tbody th{text-align:left}.activity-table tbody th{background:none;min-width:170px}
+.activity-table thead th:first-child{width:auto}
+.activity-time{white-space:nowrap;color:var(--color-muted)}
+.activity-user{padding:0;border:0;background:none;font:inherit;font-weight:600;color:var(--color-ink);cursor:pointer;text-align:left}
+.activity-user:hover{color:var(--analytics-blue);text-decoration:underline}
+.activity-place{max-width:340px;overflow-wrap:anywhere;color:#566780}
+.activity-type{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:6px;background:#f0f3fa;color:#41506b;white-space:nowrap}
+.activity-type.lecture_completed{background:#e6f4ed;color:var(--analytics-teal)}
+.activity-type.practice_submitted{background:#f1ecf8;color:#6d55a0}
+.activity-type.test_submitted{background:#e9eefb;color:var(--analytics-blue)}
+.activity-type.lecture_started{background:#fbf3e3;color:#94661a}
+@media(max-width:760px){.activity-filters{grid-template-columns:1fr 1fr}.activity-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.activity-days{gap:3px;height:150px}.activity-day-label{font-size:9px;writing-mode:vertical-rl;transform:rotate(180deg);justify-self:center;height:38px}}

@@ -1,4 +1,4 @@
-import { BookOpen, GraduationCap, UserRound } from 'lucide-react'
+import { BookOpen, Gauge, GraduationCap, UserRound } from 'lucide-react'
 import { Link, NavLink } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import type { User } from '../api'
@@ -9,6 +9,7 @@ export function MainLayout({ user, children }: { user: User; children: ReactNode
   const { t } = useI18n()
   const navItems = [
     { to: '/', label: t('Моё обучение'), icon: GraduationCap, end: true },
+    { to: '/progress', label: t('Моя готовность'), icon: Gauge },
     { to: '/catalog', label: t('Каталог'), icon: BookOpen },
     { to: '/profile', label: t('Профиль'), icon: UserRound },
   ]

@@ -774,3 +774,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .learning-breadcrumbs > span { font-size: .65rem; }
   .learning-course-grid { grid-template-columns: minmax(0, 1fr); }
 }
+.adaptive-recommendation { display: grid; gap: 6px; max-width: 560px; margin: 18px auto 0; padding: 16px 18px; border-radius: 12px; background: #ffffffb3; color: #344158; text-align: left; }
+.adaptive-recommendation h4 { margin: 0 0 2px; font-size: .95rem; }
+.adaptive-recommendation p { margin: 0; color: inherit; }
+.adaptive-recommendation ul { margin: 0; padding-left: 20px; }
+.adaptive-recommendation .adaptive-level { font-weight: 650; }
+.adaptive-recommendation h4 { font-weight: 700; color: var(--color-text, #17223b); }
+.adaptive-recommendation ul { list-style: disc; }
+.adaptive-recommendation .adaptive-review { display: block; margin-top: 2px; font-size: .88em; color: var(--color-muted); }
+.adaptive-recommendation .adaptive-review a { color: var(--color-primary-dark); font-weight: 600; }
+.adaptive-recommendation .adaptive-route { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--color-border); }

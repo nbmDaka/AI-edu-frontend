@@ -4,7 +4,11 @@ export type AnalyticsUsage = {
 export type AnalyticsCourse = AnalyticsUsage & {
   id: number; short_id: string; title: string; learning_track_id: number; module_count: number; item_count: number
 }
-export type AnalyticsModule = AnalyticsUsage & { id: number; short_id: string; title: string; course_id: number; item_count: number }
+export type ModuleRecommendations = {
+  attempts: number; tested_students: number; next_students: number; repeat_students: number; next_rate: number
+  average_readiness: number | null; readiness_values: number[]; weak_topics: { competency: string; title: string; students: number }[]
+}
+export type AnalyticsModule = AnalyticsUsage & { id: number; short_id: string; title: string; course_id: number; item_count: number; threshold?: number; recommendations?: ModuleRecommendations }
 export type LearningAnalytics = {
   generated_at: string; period: string; since: string | null
   filters: { track: number | null; course: number | null }

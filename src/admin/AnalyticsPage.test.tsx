@@ -76,3 +76,35 @@ it('CSV preserves non-Latin text, delimiters and neutralises spreadsheet formula
   expect(csv).toContain('"Название";"a;b";"""quoted"""')
   expect(csv).toContain('"\'=HYPERLINK(""bad"")";"\' +formula";"12"')
 })
+
+it('shows module recommendations and recalculates them for another threshold', async () => {
+  const [module, ...rest] = analyticsFixture.modules
+  mockApi.mockResolvedValue({ ...analyticsFixture, modules: [{ ...module, threshold: 60, recommendations: {
+    attempts: 5, tested_students: 4, next_students: 2, repeat_students: 2, next_rate: 50, average_readiness: 58.5,
+    readiness_values: [41, 55, 64, 74], weak_topics: [{ competency: 'визуализация', title: 'Визуализация', students: 2 }] } }, ...rest] })
+  mount()
+  const table = await screen.findByRole('table', { name: 'Рекомендации по модулям' })
+  const row = within(table).getAllByRole('row')[1]
+  expect(within(row).getByText('Визуализация')).toBeTruthy()
+  expect(within(row).getByText('58,5%')).toBeTruthy()
+  fireEvent.change(screen.getByRole('slider'), { target: { value: '50' } })
+  expect(within(table).getByRole('columnheader', { name: 'Далее при пороге 50%' })).toBeTruthy()
+  expect(within(row).getAllByText('75%').length).toBe(1)
+})
+
+it('saves a new module threshold', async () => {
+  const [module, ...rest] = analyticsFixture.modules
+  const report = { ...analyticsFixture, modules: [{ ...module, threshold: 60, recommendations: {
+    attempts: 1, tested_students: 1, next_students: 0, repeat_students: 1, next_rate: 0, average_readiness: 43.5,
+    readiness_values: [43.5], weak_topics: [] } }, ...rest] }
+  mockApi.mockImplementation(async (path: string) => (path.startsWith('admin/analytics') ? report : { short_id: module.short_id, adaptive_threshold: 45 }) as never)
+  render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+    <MemoryRouter><AnalyticsPage/></MemoryRouter></QueryClientProvider>)
+  const table = await screen.findByRole('table', { name: 'Рекомендации по модулям' })
+  const input = within(table).getByRole('spinbutton', { name: `Порог модуля ${module.title}` })
+  fireEvent.change(input, { target: { value: '90' } })
+  expect((within(table).getByRole('button', { name: 'Сохранить' }) as HTMLButtonElement).disabled).toBe(true)
+  fireEvent.change(input, { target: { value: '45' } })
+  fireEvent.click(within(table).getByRole('button', { name: 'Сохранить' }))
+  await waitFor(() => expect(mockApi).toHaveBeenCalledWith(`modules/${module.short_id}/threshold/`, 'PATCH', { adaptive_threshold: 45 }))
+})

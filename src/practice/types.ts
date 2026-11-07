@@ -36,7 +36,7 @@ export type RuntimeProps = {
 export type WorkPreview = { title?: string; files?: { name: string; url: string }[] }
 export type PracticePlugin = {
   type: string; version: string; initialConfig: () => PracticeConfig
-  layout?: 'workspace'
+  layout?: 'workspace' | 'standalone'
   ConfigEditor: ComponentType<ConfigEditorProps>; StudentRuntime: ComponentType<RuntimeProps>
   validateConfig: (config: PracticeConfig) => string | null
 }

@@ -6,6 +6,7 @@ import { api } from '../api'
 import { Button, ErrorState, Input, Loading, Select } from '../components/ui'
 import { useI18n } from '../i18n'
 import { analyticsCsv, type AnalyticsCourse, type AnalyticsModule, type LearningAnalytics } from './analytics'
+import { RecommendationPanel } from './RecommendationPanel'
 import './analytics.css'
 
 export function AnalyticsPage() {
@@ -109,6 +110,7 @@ export function AnalyticsPage() {
         </tr>)}</tbody></table>{!rows.length && <div className="management-empty">{t('Нет данных для выбранных фильтров')}</div>}</div>
         {pageCount > 1 && <div className="management-pagination"><span>{t('Страница')} {currentPage} / {pageCount}</span><div className="management-pagination-actions"><Button variant="secondary" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>{t('Назад')}</Button><Button variant="secondary" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>{t('Далее')}</Button></div></div>}
       </section>
+      <RecommendationPanel modules={data.modules} courseTitles={courseTitles} number={number}/>
       <details className="analytics-methodology"><summary>{t('Как считаются показатели')}</summary><ul>
         <li>{t('Учитываются студенты, включая неактивные аккаунты. Администраторы и удалённые пользователи исключены.')}</li>
         <li>{t('Фильтры ограничивают учебный контент. Общее число студентов и назначения на траектории показывают текущее состояние платформы.')}</li>

@@ -114,6 +114,13 @@ export function PracticeFlow({ state, plugin, item, ownerId, busy, start, submit
     ? criteria.every((row, index) => !row.is_required || checks[index]) : confirmed)
   const Runtime = plugin.StudentRuntime
 
+  if (plugin.layout === 'standalone') return <section ref={root} className="practice-flow">
+    <header className="practice-flow-heading"><span className="eyebrow">{t('ПРАКТИЧЕСКАЯ РАБОТА')}</span><h1>{version.title}</h1></header>
+    {version.description && <p className="practice-description">{version.description}</p>}
+    <Runtime state={state} busy={busy} item={item} ownerId={ownerId}
+      onStart={async () => { await start() }} onSubmit={async data => { await submit(data) }}/>
+  </section>
+
   return <section ref={root} className={`practice-flow ${workspace ? 'is-workspace' : ''}`}>
     {!workspace && <>
       <header className="practice-flow-heading"><span className="eyebrow">{t('ПРАКТИЧЕСКАЯ РАБОТА')}</span><h1>{version.title}</h1></header>
