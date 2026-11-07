@@ -4,6 +4,7 @@ import { workshops } from '../workspace/workshops'
 import { GuidedAssignment } from './GuidedAssignment'
 import { AssignmentConfigEditor } from './AssignmentConfigEditor'
 import { defaultTaskConfig, validateTaskConfig } from './commonTask'
+import { registerVirtualLabPractices } from '../virtual-labs/practice/register'
 
 const plugins = new Map<string, PracticePlugin>()
 export function registerPractice(plugin: PracticePlugin) {
@@ -25,3 +26,7 @@ registerPractice({ type: 'guided_assignment', version: '1.0.0',
   ConfigEditor: AssignmentConfigEditor, StudentRuntime: GuidedAssignment,
   validateConfig: validateTaskConfig,
 })
+
+// Модуль «Виртуальные лаборатории»: работы № 4–14 как практики (типы virtual_lab_vw04 … virtual_lab_vw14)
+registerVirtualLabPractices({ registerPractice, ConfigEditor: AssignmentConfigEditor,
+  initialConfig: defaultTaskConfig, validateConfig: validateTaskConfig })

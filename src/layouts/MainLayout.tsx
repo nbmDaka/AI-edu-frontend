@@ -1,4 +1,4 @@
-import { BookOpen, GraduationCap, UserRound } from 'lucide-react'
+import { BookOpen, FlaskConical, GraduationCap, UserRound } from 'lucide-react'
 import { Link, NavLink } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import type { User } from '../api'
@@ -10,6 +10,7 @@ export function MainLayout({ user, children }: { user: User; children: ReactNode
   const navItems = [
     { to: '/', label: t('Моё обучение'), icon: GraduationCap, end: true },
     { to: '/catalog', label: t('Каталог'), icon: BookOpen },
+    { to: '/virtual-labs', label: t('Виртуальные лаборатории'), icon: FlaskConical },
     { to: '/profile', label: t('Профиль'), icon: UserRound },
   ]
   return <div className="main-layout">

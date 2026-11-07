@@ -8,6 +8,7 @@ import { AdminLayout } from './layouts/AdminLayout'
 import { ErrorState, Loading } from './components/ui'
 import { useI18n } from './i18n'
 
+const VirtualLabsApp = lazy(() => import('./virtual-labs').then(module => ({ default: module.VirtualLabsApp })))
 const UsersPage = lazy(() => import('./admin/UsersPage').then(module => ({ default: module.UsersPage })))
 const AnalyticsPage = lazy(() => import('./admin/AnalyticsPage').then(module => ({ default: module.AnalyticsPage })))
 const UserDetailPage = lazy(() => import('./admin/UserDetailPage').then(module => ({ default: module.UserDetailPage })))
@@ -70,6 +71,7 @@ export default function App() {
     <Route path="/admin/lessons" element={<Navigate to="/admin/curriculum" replace/>}/>
     <Route path="/admin/lessons/:id/edit" element={<ProtectedPage user={user} admin><EditorPage/></ProtectedPage>}/>
     <Route path="/admin/lessons/:id/test" element={<ProtectedPage user={user} admin><TestEditor/></ProtectedPage>}/>
+    <Route path="/virtual-labs/*" element={<ProtectedPage user={user}><VirtualLabsApp/></ProtectedPage>}/>
     <Route path="*" element={<Navigate to="/" replace/>}/>
   </Routes></Suspense>
 }
