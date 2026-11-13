@@ -4,7 +4,7 @@ import { ArrowLeft, CheckCircle2, Circle, CircleX, ClipboardList, Clock3 } from 
 import { useSearchParams } from 'react-router-dom'
 import { api, ApiError, type Attempt, type AttemptQuestion, type LearningItem, type Lesson, type Page, type Test } from './api'
 import { Button, ErrorState, Loading, Notice } from './components/ui'
-import { AdaptiveResultCard } from './AdaptiveLearning'
+import { AdaptiveResultCard, AttemptSummary } from './AdaptiveLearning'
 import { NextItemAction } from './layouts/NextItemAction'
 import { LanguageSelect, useI18n } from './i18n'
 import './assessment.css'
@@ -32,6 +32,7 @@ function LoadedTestRunner({ itemId, ownerId, next, courseSlug, test }: Props & {
   })
   const [submitting, setSubmitting] = useState(false), sending = useRef(false)
   const [confirm, setConfirm] = useState(false), [message, setMessage] = useState('')
+  const [freshAttemptId, setFreshAttemptId] = useState<number | null>(null)
   const [submitted, setSubmitted] = useState<Attempt | null>(null)
   const [historyPage, setHistoryPage] = useState(() => Math.max(1, Number.parseInt(search.get('history_page') ?? '1', 10) || 1))
   const attempts = useQuery({ queryKey: ['attempts', itemId, historyPage], queryFn: () => api<Page<Attempt>>(`items/${itemId}/attempts/${historyPage === 1 ? '' : `?page=${historyPage}`}`) })
@@ -55,6 +56,7 @@ function LoadedTestRunner({ itemId, ownerId, next, courseSlug, test }: Props & {
     sending.current = true; setSubmitting(true); setMessage('')
     try {
       const attempt = await api<Attempt>(`items/${itemId}/attempts/`, 'POST', { answers: test.questions.map(question => ({ question: question.id, option: answers[question.id!] })) })
+      setFreshAttemptId(attempt.id)
       setSubmitted(attempt)
       setHistoryPage(1)
       setAnswers({}); go('results', attempt, true, 1)
@@ -63,14 +65,14 @@ function LoadedTestRunner({ itemId, ownerId, next, courseSlug, test }: Props & {
     finally { sending.current = false; setSubmitting(false) }
   }
   const counts = <p className="attempt-count" aria-live="polite">{used !== undefined && <span>{t('Использовано попыток')}: {used}</span>}{remaining !== undefined && <span>{t('Осталось попыток')}: {remaining}</span>}{test.max_attempts === null && <span>{t('Количество попыток не ограничено')}</span>}</p>
-  const history = attempts.data?.results.length ? <div className="assessment-history"><h3>{t('История попыток')}</h3>{attempts.data.results.map(attempt => <button type="button" key={attempt.id} onClick={() => go('results', attempt)}><Clock3 size={16}/><span>{new Date(attempt.completed_at).toLocaleString(locale === 'kz' ? 'kk-KZ' : locale === 'en' ? 'en-US' : 'ru-RU')}</span><strong>{attempt.percent}%</strong><span className={attempt.passed ? 'good' : 'bad'}>{t(attempt.passed ? 'Пройдено' : 'Не пройдено')}</span><span>{t('Посмотреть результат')}</span></button>)}</div> : null
+  const history = attempts.data?.results.length ? <div className="assessment-history"><h3>{t('История попыток')}</h3>{attempts.data.results.map(attempt => <button type="button" key={attempt.id} onClick={() => go('results', attempt)}><Clock3 size={16}/><span>{new Date(attempt.completed_at).toLocaleString(locale === 'kz' ? 'kk-KZ' : locale === 'en' ? 'en-US' : 'ru-RU')}</span><AttemptSummary attempt={attempt}/><span>{t('Посмотреть результат')}</span></button>)}</div> : null
   if (!taking && !reviewing) return <section className="test-section assessment-overview">
     <div className="assessment-intro-icon"><ClipboardList size={28}/></div><span className="eyebrow">{t('ТЕСТ')}</span><h1>{test.title}</h1>{test.description && <p className="assessment-description">{test.description}</p>}
     <div className="assessment-facts"><div><span>{t('Вопросов')}</span><strong>{test.questions.length}</strong></div><div><span>{t('Проходной балл')}</span><strong>{test.passing_percent}%</strong></div><div><span>{t('Попыток')}</span><strong>{test.max_attempts ?? '∞'}</strong></div></div>
     <p>{t('Ответьте на все вопросы. Перед отправкой вы сможете проверить ответы. После завершения увидите результат и разбор каждого вопроса.')}</p>
     {counts}{attempts.isLoading && <Loading variant="inline" label={t('Загрузка истории попыток…')}/>}
     {attempts.error && <><Notice kind="error" text={t('Не удалось загрузить историю попыток. Ограничения проверяются сервером.')}/><Button variant="secondary" onClick={() => void attempts.refetch()}>{t('Повторить загрузку истории')}</Button></>}
-    {historyPage === 1 && latest?.adaptive_result && !latest.adaptive_result.module_completed && <AdaptiveResultCard result={latest.adaptive_result}/>}
+    {historyPage === 1 && latest?.adaptive_result && !latest.adaptive_result.module_completed && <AdaptiveResultCard result={latest.adaptive_result} historical/>}
     {exhausted ? <Notice kind="error" text={t('Лимит попыток исчерпан')}/> : <Button disabled={!test.questions.length || attempts.isLoading || !canRetry} onClick={() => go('assessment')}>{t(Object.keys(answers).length ? 'Продолжить тестирование' : 'Начать тестирование')}</Button>}
     {history}
     <div className="actions">{historyPage > 1 && <Button variant="secondary" onClick={() => setHistoryPage(page => page - 1)}>{t('Предыдущая страница')}</Button>}{attempts.data?.next && <Button variant="secondary" onClick={() => setHistoryPage(page => page + 1)}>{t('Следующая страница')}</Button>}</div>
@@ -85,13 +87,13 @@ function LoadedTestRunner({ itemId, ownerId, next, courseSlug, test }: Props & {
           <div className="assessment-submit"><p>{t('После отправки ответы изменить нельзя. Сначала убедитесь, что вы ответили на все вопросы.')}</p><Button disabled={submitting || !test.questions.length || answered !== test.questions.length} onClick={() => { setMessage(''); setConfirm(true) }}>{t('Отправить ответы')}</Button><Button variant="secondary" onClick={() => go()}>{t('Сохранить и выйти')}</Button></div>
         </>}
       </div> : attempts.isLoading && !result ? <Loading/> : result ? <>
-        <div className={`assessment-result-banner ${result.passed ? 'passed' : 'failed'}`}><div><div><h1>{t('Ваш результат')}: <strong>{result.percent}%</strong></h1><p>{t(result.passed ? 'Тест пройден!' : 'Тест не пройден')} · {result.earned_points} {t('из')} {result.total_points} {t('баллов')}{result.test_version === test.version && <> · {t('Проходной балл')} {test.passing_percent}%</>}</p>{counts}</div></div></div>
-        <div className="assessment-content assessment-review">{result.adaptive_result && <AdaptiveResultCard result={result.adaptive_result} showNext={false}/>}
+        <div className={`assessment-result-banner ${result.adaptive_result ? 'adaptive-test-result' : result.passed ? 'passed' : 'failed'}`}><div><div><h1>{t(result.adaptive_result ? 'Результат теста' : 'Ваш результат')}: <strong>{result.percent}%</strong></h1><p>{t(result.passed ? 'Тест пройден!' : 'Тест не пройден')} · {result.earned_points} {t('из')} {result.total_points} {t('баллов')}{result.test_version === test.version && <> · {t('Проходной балл')} {test.passing_percent}%</>}</p>{counts}</div></div></div>
+        <div className="assessment-content assessment-review">{result.adaptive_result && <AdaptiveResultCard result={result.adaptive_result} showNext={false} historical={freshAttemptId !== result.id}/>}
           <ol className="assessment-questions">{result.snapshot?.map((question, index) => <li key={index}><ReviewQuestion question={question} index={index}/></li>)}</ol>
           <div className="assessment-review-actions">{canRetry && <Button variant="secondary" disabled={submitting} onClick={() => { setAnswers({}); go('assessment') }}>{t('Пройти ещё раз')}</Button>}{exhausted && <p>{t('Лимит попыток исчерпан')}</p>}</div>
         </div>
       </> : <div className="assessment-content"><ErrorState error={new Error(t('Не удалось загрузить результат этой попытки'))}/><Button variant="secondary" onClick={() => go()}>{t('Вернуться к тесту')}</Button></div>}
-      {reviewing && result && (!result.adaptive_result || result.adaptive_result.module_completed) && <div className="learning-next-bar"><NextItemAction next={next} courseSlug={courseSlug} nextItemId={result.adaptive_result?.next_item_short_id}/></div>}
+      {reviewing && result && (!result.adaptive_result || result.adaptive_result.module_completed) && <div className="learning-next-bar"><NextItemAction next={result.adaptive_result && freshAttemptId !== result.id ? undefined : next} courseSlug={courseSlug} nextItemId={freshAttemptId === result.id ? result.adaptive_result?.next_item_short_id : undefined}/></div>}
     </div>
     {confirm && <SubmitConfirmation busy={submitting} message={message} onCancel={() => { if (!sending.current) setConfirm(false) }} onSubmit={() => void submit()}/>}
   </section>

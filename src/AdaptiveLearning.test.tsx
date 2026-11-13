@@ -36,7 +36,7 @@ describe('adaptive learning', () => {
 
   it('opens the next module after readiness reaches its threshold', () => {
     mount(<AdaptiveResultCard result={{ ...result, readiness: 77, module_completed: true, module_passed: true, next_item_short_id: 'lecture-2' }}/>)
-    expect(screen.getByRole('heading', { name: 'Модуль освоен' })).toBeTruthy()
+    expect(screen.getByText('Модуль освоен')).toBeTruthy()
     expect(screen.getByRole('link', { name: 'Следующий модуль' }).getAttribute('href')).toBe('/items/lecture-2')
   })
 

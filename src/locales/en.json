@@ -995,5 +995,13 @@
   "Завершённых материалов пока нет.": "No completed materials yet.",
   "Нет доступных курсов.": "No courses available.",
   "Предыдущая страница": "Previous page",
-  "Следующая страница": "Next page"
+  "Следующая страница": "Next page",
+  "Результат теста": "Test result",
+  "Результат модуля": "Module result",
+  "Порог готовности достигнут": "Readiness threshold reached",
+  "Порог готовности не достигнут": "Readiness threshold not reached",
+  "На момент попытки": "At the time of the attempt",
+  "Состояние сохранено на момент попытки. Текущую доступность смотрите в курсе.": "State saved at the time of the attempt. Check the course for current access.",
+  "Решение сервера по этой попытке.": "Server decision for this attempt.",
+  "Модуль был освоен ранее. Эта попытка не отменяет завершение.": "The module was completed earlier. This attempt preserves completion."
 }

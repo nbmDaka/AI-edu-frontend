@@ -50,7 +50,7 @@ publish_draft(practice)
 quiz = Test.objects.create(title='Итоговый тест', is_published=True)
 item = LearningItem.objects.create(module=first, title='Итоговый тест', type='TEST', test=quiz, status='PUBLISHED', position=2)
 for i, competency in enumerate(['Теория', 'Теория', 'Применение', 'Применение']):
-    question = Question.objects.create(test=quiz, text=f'Вопрос {i + 1}', position=i, competency=competency)
+    question = Question.objects.create(test=quiz, text=f'Вопрос {i + 1}', position=i, competency=competency, points=9 if i == 3 else 1)
     Option.objects.create(question=question, text='Верный ответ', position=0, is_correct=True)
     Option.objects.create(question=question, text='Неверный ответ', position=1, is_correct=False)
 for width in [1280, 390]:

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { apiAll, type AdaptiveResult, type LearningItem, type Module } from './api'
+import { apiAll, type Attempt, type AdaptiveResult, type LearningItem, type Module } from './api'
 import { Button, ErrorState, Loading } from './components/ui'
 import { useI18n } from './i18n'
 
@@ -10,19 +10,33 @@ export function LearningItemLink({ item, locked = item.is_locked, children }: { 
   return locked ? <div className="locked-learning-item" aria-disabled="true" title={t('Сначала завершите предыдущий модуль')}>{children}</div> : <Link to={`/items/${item.short_id}`}>{children}</Link>
 }
 
-export function AdaptiveResultCard({ result, showNext = true }: { result: AdaptiveResult; showNext?: boolean }) {
+export function AttemptSummary({ attempt }: { attempt: Attempt }) {
+  const { t } = useI18n()
+  const result = attempt.adaptive_result
+  return <span className="attempt-summary">
+    <span>{result && `${t('Результат теста')}: `}<strong>{attempt.percent}%</strong> · <span className={attempt.passed ? 'good' : 'bad'}>{t(attempt.passed ? 'Тест пройден!' : 'Тест не пройден')}</span></span>
+    {result && <span>
+      {t('Результат модуля')}: {t('Готовность')} {result.readiness}% · {t('Порог')} {result.threshold}% · <span className={result.module_passed ? 'good' : 'bad'}>{t(result.module_passed ? 'Порог готовности достигнут' : 'Порог готовности не достигнут')}</span>
+      <small>{t('На момент попытки')}: {t(result.module_completed ? 'Модуль освоен' : 'Повторите модуль')}</small>
+    </span>}
+  </span>
+}
+
+export function AdaptiveResultCard({ result, showNext = true, historical = false }: { result: AdaptiveResult; showNext?: boolean; historical?: boolean }) {
   const { t } = useI18n()
   return <div className={`result-card ${result.module_completed ? 'passed' : 'failed'}`}>
-    <h3>{t(result.module_completed ? 'Модуль освоен' : 'Повторите модуль')}</h3>
+    <h3>{t('Результат модуля')}</h3><h4>{t(result.module_passed ? 'Порог готовности достигнут' : 'Порог готовности не достигнут')}</h4>
     <strong>{result.readiness}%</strong><p>{t('Готовность')} · {t('Порог')} {result.threshold}%</p>
+    <p>{t(historical ? 'Состояние сохранено на момент попытки. Текущую доступность смотрите в курсе.' : 'Решение сервера по этой попытке.')}</p>
+    <p>{t(result.module_passed ? 'Модуль освоен' : result.module_completed ? 'Модуль был освоен ранее. Эта попытка не отменяет завершение.' : 'Повторите модуль')}</p>
+    {!historical && <p>{t(result.module_completed ? 'Можно продолжить обучение.' : 'Пройдите материалы и практику ещё раз, затем повторите итоговый тест.')}</p>}
     <div className="adaptive-indicators">{([
       ['Теория', result.theory], ['Практика', result.practice], ['Ошибки', result.errors], ['Компетенции', result.competency],
     ] as const).map(([label, value]) => <span key={label}>{t(label)}: {Math.round(value * 100)}%</span>)}</div>
     <h4>{t('Результаты по компетенциям')}</h4>
     <p>{t('Переход определяется общей готовностью. Компетенции показаны от меньшего значения к большему.')}</p>
     {Object.keys(result.competencies).length ? <ul className="competency-results">{Object.entries(result.competencies).sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0])).map(([name, value]) => <li key={name}><span>{name}</span><strong>{Math.round(value * 100)}%</strong></li>)}</ul> : <p>{t('Нет данных по компетенциям для этой попытки.')}</p>}
-    <p>{t(result.module_completed ? 'Можно продолжить обучение.' : 'Пройдите материалы и практику ещё раз, затем повторите итоговый тест.')}</p>
-    {result.module_completed ? result.next_item_short_id ? showNext && <Link className="button" to={`/items/${result.next_item_short_id}`}>{t('Следующий модуль')}</Link> : <p>{t('Все опубликованные модули курса пройдены.')}</p> : null}
+    {!historical && result.module_completed ? result.next_item_short_id ? showNext && <Link className="button" to={`/items/${result.next_item_short_id}`}>{t('Следующий модуль')}</Link> : <p>{t('Все опубликованные модули курса пройдены.')}</p> : null}
     {!result.module_completed && <RepeatMaterials result={result}/>}
   </div>
 }

@@ -774,3 +774,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .learning-breadcrumbs > span { font-size: .65rem; }
   .learning-course-grid { grid-template-columns: minmax(0, 1fr); }
 }
+
+.attempt-summary{display:grid;gap:6px;min-width:0;overflow-wrap:anywhere}.attempt-summary small{display:block;color:var(--color-muted)}
+@media(max-width:700px){.profile-history-row>.attempt-summary:nth-child(2){flex:1 1 100%}}
