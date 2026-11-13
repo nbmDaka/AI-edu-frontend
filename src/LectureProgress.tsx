@@ -12,7 +12,7 @@ export function LectureProgress({ itemId, courseId, savedPercent, children }: {
 }) {
   const contentRef = useRef<HTMLDivElement>(null)
   const queryClient = useQueryClient()
-  const refreshProgress = () => Promise.all(['course-progress', 'learning-summary'].map(key => queryClient.invalidateQueries({ queryKey: key === 'course-progress' ? [key, courseId] : [key] })))
+  const refreshProgress = () => Promise.all(['course-progress', 'learning-summary', 'program-journey', 'learning-items', 'course-items', 'repeat-materials'].map(key => queryClient.invalidateQueries({ queryKey: key === 'course-progress' ? [key, courseId] : [key] })))
 
   useEffect(() => {
     let maximum = savedPercent

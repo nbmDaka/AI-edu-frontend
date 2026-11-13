@@ -28,6 +28,7 @@ const AdminCurriculum = lazy(() => import('./AdminCurriculum').then(module => ({
 const CurriculumEntityPage = lazy(() => import('./curriculum/CurriculumEntityPage').then(module => ({ default: module.CurriculumEntityPage })))
 
 const MyLearningPage = lazy(() => import('./MyLearningPage').then(module => ({ default: module.MyLearningPage })))
+const MyProgressPage = lazy(() => import('./MyProgressPage').then(module => ({ default: module.MyProgressPage })))
 const CertificatePage = lazy(() => import('./ProgramJourney').then(module => ({ default: module.CertificatePage })))
 
 export function ProtectedPage({ user, children, admin = false }: { user: User | null | undefined; children: React.ReactNode; admin?: boolean }) {
@@ -51,6 +52,7 @@ export default function App() {
     <Route path="/resend-verification" element={<EmailVerificationPage key="resend" mode="resend"/>}/>
     <Route path="/" element={<ProtectedPage user={user}>{user?.role === 'ADMIN' ? <Navigate to="/admin/curriculum" replace/> : <MyLearningPage user={user!}/>}</ProtectedPage>}/>
     <Route path="/catalog" element={<ProtectedPage user={user}><CatalogPage/></ProtectedPage>}/>
+    <Route path="/progress" element={<ProtectedPage user={user}>{user?.role === 'ADMIN' ? <Navigate to="/admin/analytics" replace/> : <MyProgressPage/>}</ProtectedPage>}/>
     <Route path="/courses/:slug" element={<ProtectedPage user={user}><CoursePage/></ProtectedPage>}/>
     <Route path="/lessons/:id" element={user ? <LessonPage/> : <Navigate to="/login" replace/>}/>
     <Route path="/items/:id" element={user ? <LearningItemPage user={user}/> : <Navigate to="/login" replace/>}/>

@@ -141,7 +141,19 @@ describe('student learning journey', () => {
     expect(vi.mocked(api)).toHaveBeenCalledWith('lessons/old/')
   })
 
-  it('directs an adaptive failed attempt back to study before retaking the test', async () => {
+  it('reloads a historical result from its actual history page', async () => {
+    vi.mocked(api).mockImplementation(async path => {
+      if (path.endsWith('/test/')) return quiz as never
+      if (path.endsWith('/attempts/?page=2')) return { count: 31, next: null, previous: '?page=1', results: [{ id: 31, passed: false, percent: 50, earned_points: 1, total_points: 2, snapshot: [] }] } as never
+      throw new Error(`Unexpected request: ${path}`)
+    })
+    mount(<TestRunner itemId="quiz"/>, '/?view=results&attempt=31&history_page=2')
+    expect(await screen.findByRole('heading', { name: 'Ваш результат: 50%' })).toBeTruthy()
+    expect(vi.mocked(api)).toHaveBeenCalledWith('items/quiz/attempts/?page=2')
+  })
+
+  it('offers review without permanently blocking a retry after an adaptive failure', async () => {
+    vi.mocked(apiAll).mockImplementation(async path => path.startsWith('modules/') ? [{ id: 1, short_id: 'module', is_published: true }] as never : [{ id: 1, module_short_id: 'module', short_id: 'lecture', title: 'Lecture', type: 'LECTURE', status: 'PUBLISHED' }] as never)
     vi.mocked(api).mockImplementation(async (path, method) => {
       if (path.endsWith('/test/')) return quiz as never
       if (method === 'POST') return { id: 1, passed: false, percent: 40, earned_points: 2, total_points: 5, adaptive_result: { readiness: 20, threshold: 60, module_passed: false, module_completed: false, theory: .4, practice: .2, errors: .6, competency: .3, competencies: {}, module_short_id: 'module', repeat_item_short_id: 'lecture', next_item_short_id: null } } as never
@@ -155,7 +167,8 @@ describe('student learning journey', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Завершить тестирование' }))
     const repeat = await screen.findByRole('link', { name: 'Повторить модуль' })
     expect(repeat.getAttribute('href')).toBe('/items/lecture')
-    expect(screen.queryByRole('button', { name: 'Пройти ещё раз' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Пройти ещё раз' }))
+    expect(screen.getByLabelText('Yes')).toBeTruthy()
   })
 
   it('provides account controls, course return and keyboard focus in the drawer', () => {

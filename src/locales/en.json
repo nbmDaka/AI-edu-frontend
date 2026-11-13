@@ -983,5 +983,17 @@
   "завершено": "completed",
   "Ещё не завершили": "Not yet completed",
   "Всего начатых курсов": "Total course starts",
-  "Единица подсчёта — студент и курс. Один студент может учитываться в нескольких курсах.": "The counting unit is a student–course pair. A student may be counted in several courses."
+  "Единица подсчёта — студент и курс. Один студент может учитываться в нескольких курсах.": "The counting unit is a student–course pair. A student may be counted in several courses.",
+  "Мой прогресс": "My progress",
+  "Результаты по компетенциям": "Competency results",
+  "Переход определяется общей готовностью. Компетенции показаны от меньшего значения к большему.": "Progression depends on overall readiness. Competencies are shown from lowest to highest.",
+  "Нет данных по компетенциям для этой попытки.": "No competency data for this attempt.",
+  "Материалы для повторения": "Review materials",
+  "Повторите текущие опубликованные материалы модуля по порядку. Показатели выше сохранены на момент попытки.": "Review the current published module materials in order. The indicators above were saved at the time of the attempt.",
+  "Материалы для повторения сейчас недоступны.": "Review materials are currently unavailable.",
+  "Завершённые материалы": "Completed materials",
+  "Завершённых материалов пока нет.": "No completed materials yet.",
+  "Нет доступных курсов.": "No courses available.",
+  "Предыдущая страница": "Previous page",
+  "Следующая страница": "Next page"
 }

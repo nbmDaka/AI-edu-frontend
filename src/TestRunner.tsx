@@ -33,21 +33,22 @@ function LoadedTestRunner({ itemId, ownerId, next, courseSlug, test }: Props & {
   const [submitting, setSubmitting] = useState(false), sending = useRef(false)
   const [confirm, setConfirm] = useState(false), [message, setMessage] = useState('')
   const [submitted, setSubmitted] = useState<Attempt | null>(null)
-  const attempts = useQuery({ queryKey: ['attempts', itemId], queryFn: () => api<Page<Attempt>>(`items/${itemId}/attempts/`) })
+  const [historyPage, setHistoryPage] = useState(() => Math.max(1, Number.parseInt(search.get('history_page') ?? '1', 10) || 1))
+  const attempts = useQuery({ queryKey: ['attempts', itemId, historyPage], queryFn: () => api<Page<Attempt>>(`items/${itemId}/attempts/${historyPage === 1 ? '' : `?page=${historyPage}`}`) })
   const used = attempts.data?.count
   const remaining = used === undefined || test.max_attempts === null ? undefined : Math.max(0, test.max_attempts - used)
   const exhausted = remaining === 0
   const resultId = Number(search.get('attempt'))
   const result = submitted?.id === resultId ? submitted : attempts.data?.results.find(attempt => attempt.id === resultId)
   const latest = attempts.data?.results[0]
-  const adaptiveBlocked = (reviewing ? result : latest)?.adaptive_result?.module_completed === false
-  const canRetry = !adaptiveBlocked && !exhausted && (test.max_attempts === null || remaining !== undefined)
+  const canRetry = !exhausted && !attempts.isLoading
   const answered = test.questions.filter(question => answers[question.id!] !== undefined).length
   useEffect(() => { try { if (Object.keys(answers).length) sessionStorage.setItem(storageKey, JSON.stringify(answers)); else sessionStorage.removeItem(storageKey) } catch { /* Storage can be unavailable in private browsing. */ } }, [answers, storageKey])
   useEffect(() => { window.scrollTo?.(0, 0) }, [view, resultId])
-  const go = (value?: 'assessment' | 'results', attempt?: Attempt, replace = false) => {
+  const go = (value?: 'assessment' | 'results', attempt?: Attempt, replace = false, page = historyPage) => {
+    if (attempt) setSubmitted(attempt)
     setConfirm(false); setMessage('')
-    setSearch(current => { const changed = new URLSearchParams(current); changed.delete('view'); changed.delete('attempt'); if (value) changed.set('view', value); if (attempt) changed.set('attempt', String(attempt.id)); return changed }, { replace })
+    setSearch(current => { const changed = new URLSearchParams(current); changed.delete('view'); changed.delete('attempt'); changed.delete('history_page'); if (page > 1) changed.set('history_page', String(page)); if (value) changed.set('view', value); if (attempt) changed.set('attempt', String(attempt.id)); return changed }, { replace })
   }
   const submit = async () => {
     if (sending.current || exhausted || answered !== test.questions.length) return
@@ -55,9 +56,9 @@ function LoadedTestRunner({ itemId, ownerId, next, courseSlug, test }: Props & {
     try {
       const attempt = await api<Attempt>(`items/${itemId}/attempts/`, 'POST', { answers: test.questions.map(question => ({ question: question.id, option: answers[question.id!] })) })
       setSubmitted(attempt)
-      qc.setQueryData<Page<Attempt>>(['attempts', itemId], previous => ({ count: (previous?.count ?? 0) + 1, next: previous?.next ?? null, previous: null, results: [attempt, ...(previous?.results ?? [])] }))
-      setAnswers({}); go('results', attempt, true)
-      await Promise.all(['attempts', 'course-progress', 'learning-summary', 'learning-items', 'course-items', 'modules', 'attempts-all'].map(queryKey => qc.invalidateQueries({ queryKey: [queryKey] })))
+      setHistoryPage(1)
+      setAnswers({}); go('results', attempt, true, 1)
+      await Promise.all(['attempts', 'course-progress', 'learning-summary', 'learning-items', 'course-items', 'modules', 'attempts-all', 'program-journey', 'repeat-materials'].map(queryKey => qc.invalidateQueries({ queryKey: [queryKey] })))
     } catch (error) { setMessage(error instanceof Error ? error.message : t('Не удалось отправить ответы')) }
     finally { sending.current = false; setSubmitting(false) }
   }
@@ -69,8 +70,10 @@ function LoadedTestRunner({ itemId, ownerId, next, courseSlug, test }: Props & {
     <p>{t('Ответьте на все вопросы. Перед отправкой вы сможете проверить ответы. После завершения увидите результат и разбор каждого вопроса.')}</p>
     {counts}{attempts.isLoading && <Loading variant="inline" label={t('Загрузка истории попыток…')}/>}
     {attempts.error && <><Notice kind="error" text={t('Не удалось загрузить историю попыток. Ограничения проверяются сервером.')}/><Button variant="secondary" onClick={() => void attempts.refetch()}>{t('Повторить загрузку истории')}</Button></>}
-    {exhausted ? <Notice kind="error" text={t('Лимит попыток исчерпан')}/> : adaptiveBlocked && latest?.adaptive_result ? <AdaptiveResultCard result={latest.adaptive_result}/> : <Button disabled={!test.questions.length || attempts.isLoading} onClick={() => go('assessment')}>{t(Object.keys(answers).length ? 'Продолжить тестирование' : 'Начать тестирование')}</Button>}
+    {historyPage === 1 && latest?.adaptive_result && !latest.adaptive_result.module_completed && <AdaptiveResultCard result={latest.adaptive_result}/>}
+    {exhausted ? <Notice kind="error" text={t('Лимит попыток исчерпан')}/> : <Button disabled={!test.questions.length || attempts.isLoading || !canRetry} onClick={() => go('assessment')}>{t(Object.keys(answers).length ? 'Продолжить тестирование' : 'Начать тестирование')}</Button>}
     {history}
+    <div className="actions">{historyPage > 1 && <Button variant="secondary" onClick={() => setHistoryPage(page => page - 1)}>{t('Предыдущая страница')}</Button>}{attempts.data?.next && <Button variant="secondary" onClick={() => setHistoryPage(page => page + 1)}>{t('Следующая страница')}</Button>}</div>
   </section>
 
   return <section className="test-section assessment-screen">

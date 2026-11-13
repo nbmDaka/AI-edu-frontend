@@ -26,7 +26,7 @@ export function PracticeRunner({ item, ownerId, onWorkspaceChange }: { item: Lea
       const next = start ? await api<PracticeState>(`${path}start/`, 'POST')
         : await api<PracticeState>(path, 'POST', { submission_id: current.submission!.id, submission_data: data })
       qc.setQueryData(key, next)
-      await Promise.all([qc.invalidateQueries({ queryKey: ['course-progress'] }), qc.invalidateQueries({ queryKey: ['learning-summary'] })])
+      await Promise.all(['course-progress', 'learning-summary', 'program-journey', 'learning-items', 'course-items', 'repeat-materials'].map(key => qc.invalidateQueries({ queryKey: [key] })))
       setFailed(false); if (!start) setNotice(t('Практическая работа завершена'))
       return true
     } catch (error) { setFailed(true); setNotice(error instanceof Error ? error.message : t('Не удалось сохранить')); return false }
