@@ -62,7 +62,7 @@ describe('main flows', () => {
     fireEvent.click(screen.getByLabelText('Answer'))
     fireEvent.click(screen.getByRole('button', { name: 'Отправить ответы' }))
     fireEvent.click(screen.getByRole('button', { name: 'Завершить тестирование' }))
-    await waitFor(() => expect(mockedApi).toHaveBeenCalledWith('items/1/attempts/', 'POST', { answers: [{ question: 10, option: 20 }] }))
+    await waitFor(() => expect(mockedApi).toHaveBeenCalledWith('items/1/attempts/', 'POST', { answers: [{ question: 10, option: 20 }], request_id: expect.any(String) }))
   })
 
   it('renders course cover in catalog when present', async () => {

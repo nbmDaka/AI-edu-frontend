@@ -1,3 +1,4 @@
+import './adaptive-support.css'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
@@ -36,9 +37,26 @@ export function AdaptiveResultCard({ result, showNext = true, historical = false
     <h4>{t('Результаты по компетенциям')}</h4>
     <p>{t('Переход определяется общей готовностью. Компетенции показаны от меньшего значения к большему.')}</p>
     {Object.keys(result.competencies).length ? <ul className="competency-results">{Object.entries(result.competencies).sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0])).map(([name, value]) => <li key={name}><span>{name}</span><strong>{Math.round(value * 100)}%</strong></li>)}</ul> : <p>{t('Нет данных по компетенциям для этой попытки.')}</p>}
+    <TargetedRecommendations result={result}/>
     {!historical && result.module_completed ? result.next_item_short_id ? showNext && <Link className="button" to={`/items/${result.next_item_short_id}`}>{t('Следующий модуль')}</Link> : <p>{t('Все опубликованные модули курса пройдены.')}</p> : null}
     {!result.module_completed && <RepeatMaterials result={result}/>}
   </div>
+}
+
+function TargetedRecommendations({ result }: { result: AdaptiveResult }) {
+  const { t } = useI18n()
+  const advice = result.recommendations
+  return <section className="targeted-recommendations"><h4>{t('Адресные рекомендации')}</h4>
+    <p>{t('Рекомендации сохранены с попыткой. Доступность ссылок проверяется сейчас.')}</p>
+    {advice ? <>
+      <p>{t('Ориентир для рекомендаций')}: {Math.round(advice.reference_score * 100)}%. {t('Он не меняет порог допуска и не является минимумом каждой компетенции.')}</p>
+      {advice.groups.map(group => <div key={group.competency}><h5>{group.competency}</h5><p>{t('Показатель на момент попытки')}: {Number((group.score * 100).toFixed(2))}% · {t('ниже ориентира')} {Math.round(advice.reference_score * 100)}%</p>
+        {group.materials.length ? <ul>{group.materials.map(material => <li key={material.item_id}>{material.available_item_short_id ? <Link to={`/items/${material.available_item_short_id}`}>{material.title}</Link> : <span>{material.title} · {t('Материал сейчас недоступен')}</span>} · {t(material.type === 'LECTURE' ? 'Лекция' : 'Практика')}</li>)}</ul> : <p>{t('Для этой компетенции нет связанных опубликованных материалов.')}</p>}
+      </div>)}
+      {advice.fallback && <p>{t(advice.fallback === 'no_weak_competencies' ? 'По этому ориентиру слабые компетенции не выделены. При необходимости повторите модуль.' : 'Адресных материалов недостаточно. Используйте общее повторение модуля.')}</p>}
+    </> : <p>{t('Для этой попытки адресные рекомендации не сохранялись. Используйте общее повторение модуля.')}</p>}
+    {result.module_completed && (!advice || advice.fallback || advice.groups.some(group => group.materials.some(material => !material.available_item_short_id))) && <RepeatMaterials result={result}/>}
+  </section>
 }
 
 function RepeatMaterials({ result }: { result: AdaptiveResult }) {

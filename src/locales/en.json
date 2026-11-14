@@ -1003,5 +1003,21 @@
   "На момент попытки": "At the time of the attempt",
   "Состояние сохранено на момент попытки. Текущую доступность смотрите в курсе.": "State saved at the time of the attempt. Check the course for current access.",
   "Решение сервера по этой попытке.": "Server decision for this attempt.",
-  "Модуль был освоен ранее. Эта попытка не отменяет завершение.": "The module was completed earlier. This attempt preserves completion."
+  "Модуль был освоен ранее. Эта попытка не отменяет завершение.": "The module was completed earlier. This attempt preserves completion.",
+  "Адресные рекомендации": "Targeted recommendations",
+  "Рекомендации сохранены с попыткой. Доступность ссылок проверяется сейчас.": "Recommendations were saved with this attempt. Link availability is checked now.",
+  "Ориентир для рекомендаций": "Recommendation reference",
+  "Он не меняет порог допуска и не является минимумом каждой компетенции.": "It does not change admission or set a minimum for each competency.",
+  "Показатель на момент попытки": "Score at the time of the attempt",
+  "ниже ориентира": "below the reference",
+  "Материал сейчас недоступен": "Material currently unavailable",
+  "Для этой компетенции нет связанных опубликованных материалов.": "No published materials are linked to this competency.",
+  "По этому ориентиру слабые компетенции не выделены. При необходимости повторите модуль.": "No weak competencies were identified using this reference. Review the module if needed.",
+  "Адресных материалов недостаточно. Используйте общее повторение модуля.": "There are not enough targeted materials. Use the full module review.",
+  "Для этой попытки адресные рекомендации не сохранялись. Используйте общее повторение модуля.": "Targeted recommendations were not saved for this attempt. Use the full module review.",
+  "Компетенции для рекомендаций": "Competencies for recommendations",
+  "Укажите компетенции вопросов теста: по одной на строку. Регистр не важен. Связи используются только для опубликованных материалов текущего модуля.": "Enter the test question competencies, one per line. Case does not matter. Links apply only to published materials in the current module.",
+  "Ключи компетенций": "Competency keys",
+  "Сохранить связи": "Save links",
+  "Связи сохранены": "Links saved"
 }

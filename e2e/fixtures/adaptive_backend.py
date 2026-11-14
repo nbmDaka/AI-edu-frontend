@@ -53,6 +53,7 @@ for i, competency in enumerate(['Теория', 'Теория', 'Примене�
     question = Question.objects.create(test=quiz, text=f'Вопрос {i + 1}', position=i, competency=competency, points=9 if i == 3 else 1)
     Option.objects.create(question=question, text='Верный ответ', position=0, is_correct=True)
     Option.objects.create(question=question, text='Неверный ответ', position=1, is_correct=False)
+User.objects.create_user(email='integration-admin@example.test', password='Integration1234!', role='ADMIN')
 for width in [1280, 390]:
     User.objects.create_user(email=f'integration-{width}@example.test', password='Integration1234!', learning_track=track)
 fixture = {'course': course.short_id, 'lecture': entry.short_id, 'practice': practice.short_id, 'test': item.short_id, 'next': next_entry.short_id}

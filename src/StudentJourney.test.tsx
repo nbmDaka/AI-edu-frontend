@@ -132,6 +132,35 @@ describe('student learning journey', () => {
     expect(screen.queryByRole('button', { name: 'Пройти ещё раз' })).toBeNull()
     expect(await screen.findByText('Осталось попыток: 0')).toBeTruthy()
     expect(count).toBe(2)
+    const requests = vi.mocked(api).mock.calls.filter(([, method]) => method === 'POST').map(([, , data]) => (data as { request_id: string }).request_id)
+    expect(new Set(requests).size).toBe(2)
+  })
+
+  it('retains the request key after a lost response and a page reload', async () => {
+    const requests: string[] = []
+    vi.mocked(api).mockImplementation(async (path, method, data) => {
+      if (path.endsWith('/test/')) return quiz as never
+      if (method === 'POST') { requests.push((data as { request_id: string }).request_id); throw new Error('Lost response') }
+      return { count: 0, results: [], next: null, previous: null } as never
+    })
+    const send = async () => {
+      const resume = await screen.findByRole('button', { name: 'Продолжить тестирование' })
+      await waitFor(() => expect((resume as HTMLButtonElement).disabled).toBe(false))
+      fireEvent.click(resume)
+      fireEvent.click(screen.getByRole('button', { name: 'Отправить ответы' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Завершить тестирование' }))
+      await screen.findByText('Lost response')
+    }
+    sessionStorage.setItem('assessment-draft:1:quiz:0', JSON.stringify({ 10: 20 }))
+    sessionStorage.setItem('assessment-draft:1:quiz:0:request', JSON.stringify({ answers: JSON.stringify([{ question: 10, option: 20 }]), request_id: 'corrupted' }))
+    mount(<TestRunner itemId="quiz" ownerId={1}/>)
+    await send()
+    cleanup()
+    mount(<TestRunner itemId="quiz" ownerId={1}/>)
+    await send()
+    expect(requests).toHaveLength(2)
+    expect(requests[0]).toBe(requests[1])
+    expect(requests[0]).toMatch(/^[0-9a-f-]{36}$/)
   })
 
   it('redirects a legacy bookmark through its explicit LearningItem relation', async () => {

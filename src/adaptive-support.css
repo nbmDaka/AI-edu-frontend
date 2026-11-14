@@ -1,0 +1,5 @@
+.targeted-recommendations { margin-top: 24px; text-align: left; overflow-wrap: anywhere; }
+.targeted-recommendations h5 { font-size: 1rem; margin: 16px 0 4px; }
+.targeted-recommendations li { margin: 8px 0; }
+.competency-materials-editor { width: calc(100% - 40px); max-width: 1000px; margin: 20px auto; overflow-wrap: anywhere; }
+.competency-materials-editor label { display: grid; gap: 8px; margin-bottom: 12px; }

@@ -31,6 +31,7 @@ function LoadedTestRunner({ itemId, ownerId, next, courseSlug, test }: Props & {
     } catch { return {} }
   })
   const [submitting, setSubmitting] = useState(false), sending = useRef(false)
+  const pendingRequest = useRef<{ answers: string; request_id: string } | null>(null)
   const [confirm, setConfirm] = useState(false), [message, setMessage] = useState('')
   const [freshAttemptId, setFreshAttemptId] = useState<number | null>(null)
   const [submitted, setSubmitted] = useState<Attempt | null>(null)
@@ -55,7 +56,14 @@ function LoadedTestRunner({ itemId, ownerId, next, courseSlug, test }: Props & {
     if (sending.current || exhausted || answered !== test.questions.length) return
     sending.current = true; setSubmitting(true); setMessage('')
     try {
-      const attempt = await api<Attempt>(`items/${itemId}/attempts/`, 'POST', { answers: test.questions.map(question => ({ question: question.id, option: answers[question.id!] })) })
+      const submittedAnswers = test.questions.map(question => ({ question: question.id, option: answers[question.id!] }))
+      const signature = JSON.stringify(submittedAnswers)
+      try { pendingRequest.current ??= JSON.parse(sessionStorage.getItem(`${storageKey}:request`) ?? 'null') } catch { /* Keep the in-memory key when storage is unavailable. */ }
+      if (pendingRequest.current?.answers !== signature || typeof pendingRequest.current.request_id !== 'string' || !/^[0-9a-f-]{36}$/i.test(pendingRequest.current.request_id)) pendingRequest.current = { answers: signature, request_id: crypto.randomUUID() }
+      try { sessionStorage.setItem(`${storageKey}:request`, JSON.stringify(pendingRequest.current)) } catch { /* A retry in this screen still retains its key. */ }
+      const attempt = await api<Attempt>(`items/${itemId}/attempts/`, 'POST', { answers: submittedAnswers, request_id: pendingRequest.current!.request_id })
+      pendingRequest.current = null
+      try { sessionStorage.removeItem(`${storageKey}:request`) } catch { /* Storage can be unavailable. */ }
       setFreshAttemptId(attempt.id)
       setSubmitted(attempt)
       setHistoryPage(1)
